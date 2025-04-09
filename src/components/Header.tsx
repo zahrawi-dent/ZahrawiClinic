@@ -1,5 +1,5 @@
 // Header.jsx
-import { A } from '@solidjs/router';
+import { Link } from '@tanstack/solid-router';
 import { createSignal } from 'solid-js';
 
 const Header = (props: any) => {
@@ -24,9 +24,9 @@ const Header = (props: any) => {
           class={`absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20 ${dropdownOpen() ? 'block' : 'hidden'
             }`}
         >
-          <A href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white">Profile</A>
-          <A href="/settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white">settings</A>
-          <A href="/login" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white">Logout</A>
+          <Link to="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white">Profile</Link>
+          <Link to="/settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white">settings</Link>
+          <Link to="/login" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white">Logout</Link>
         </div>
       </div>
     </div>

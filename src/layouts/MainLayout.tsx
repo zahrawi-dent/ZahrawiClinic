@@ -1,16 +1,17 @@
-import { useNavigate } from '@solidjs/router'
 import { createEffect, createSignal, JSX } from 'solid-js'
 import Login from '../pages/Login'
 import Header from '../components/Header'
 import Sidebar from '../components/Sidebar'
 import { User } from '../types'
+import { Outlet, useNavigate } from '@tanstack/solid-router'
 
 // <div
 //   class={`bg-indigo-800 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform ${props.isOpen ? 'translate-x-0' : '-translate-x-full'
 //     } md:relative md:translate-x-0 transition duration-200 ease-in-out z-10`}
 // >
-export default function MainLayout(props: { children: JSX.Element }): JSX.Element {
+export default function MainLayout(): JSX.Element {
   const [user, setUser] = createSignal<User | null>(null)
+
   const navigate = useNavigate()
 
   // make a fake user for now
@@ -22,10 +23,9 @@ export default function MainLayout(props: { children: JSX.Element }): JSX.Elemen
     // initializeMockApi();
   })
 
-  const logout = (): void => {
+  const logout = async (): void => {
     setUser(null)
-    // make a fake user
-    navigate('/login', { replace: true })
+    await navigate({ to: '/login' })
   }
 
   return (
@@ -47,7 +47,9 @@ export default function MainLayout(props: { children: JSX.Element }): JSX.Elemen
               </div>
             </header>
 
-            <main class="p-6">{props.children}</main>
+            <main class="p-6">
+              <Outlet />
+            </main>
           </div>
         </div>
       ) : (

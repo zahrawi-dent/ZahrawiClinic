@@ -61,6 +61,7 @@ export enum AppointmentStatus {
   NoShow = 'no_show',
   Rescheduled = 'rescheduled',
   Waiting = 'waiting',
+
 }
 
 export interface Appointment extends BaseRecord {
@@ -71,6 +72,11 @@ export interface Appointment extends BaseRecord {
   dentist: string; // Relation ID (Dentist ID)
   notes?: string; // Editor content (HTML string)
   duration?: string;
+  // --- Crucial for getting patient name easily ---
+  expand?: {
+    patient?: Patient; // The expanded patient record
+    dentist?: Dentist;
+  };
 }
 
 

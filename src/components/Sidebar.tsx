@@ -1,6 +1,6 @@
 // Sidebar.jsx
 import { For } from 'solid-js';
-import { A } from '@solidjs/router'; // A component handles active state
+import { Link } from '@tanstack/solid-router';
 
 const Sidebar = (props: any) => {
   const menuItems = [
@@ -62,8 +62,8 @@ export default Sidebar;
 
 function NavItem(props: any) {
   return (
-    <A
-      href={props.href}
+    <Link
+      to={props.href}
       // Base classes
       class="flex items-center px-4 py-3 text-indigo-200 hover:bg-indigo-900 hover:text-white transition-colors"
       // --- MARKER: Active Class ---
@@ -80,6 +80,6 @@ function NavItem(props: any) {
         </span>
         {props.label}
       </div>
-    </A>
+    </Link>
   );
 }

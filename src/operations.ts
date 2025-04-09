@@ -23,10 +23,20 @@ import {
   type Procedure, // Assuming Procedure type might be needed indirectly
   Collections
 } from './types/dental' // Adjust path as needed
+import { getEndOfDayString, getStartOfDayString, getStartOfWeekString } from './utils/dateUtils'
 
 const pb = new PocketBase('http://127.0.0.1:8090')
 
 await pb.collection('_superusers').authWithPassword('muhammadatefsw@gmail.com', '3jwfk39v8eu9EJg')
+
+// Structure returned by PocketBase getList
+export interface PaginatedResult<T> {
+  page: number;
+  perPage: number;
+  totalPages: number;
+  totalItems: number;
+  items: T[];
+}
 
 // src/services/dentalOperations.ts
 
@@ -352,6 +362,43 @@ export class DentalOperations {
       } catch (error) {
         handleError(error, 'Error fetching appointments')
       }
+    },
+
+    fetchRecentAppointments: async (): Promise<PaginatedResult<ExpandedAppointment>> => {
+      const result = await pb.collection('appointments').getList<Appointment>(1, 5, { // Page 1, 5 per page
+        sort: '-date', // Sort by date/time descending (most recent first)
+        expand: 'patient', // IMPORTANT: Expand the patient relation
+        // Optional: Add filter if needed, e.g., filter out past appointments
+        // filter: `dateTime >= "${new Date().toISOString()}"`
+      });
+
+      return result;
+    },
+    updateAppointmentStatus: async (id: string, status: string): Promise<Appointment> => {
+      try {
+        return await this.collection<Appointment>('appointments').update(id, { status });
+      } catch (error) {
+        handleError(error, `Error updating appointment with ID ${id}`);
+      }
+    },
+
+    // Fetch count of appointments for today
+    fetchAppointmentsTodayCount: async (): Promise<number> => {
+      const start = getStartOfDayString();
+      const end = getEndOfDayString();
+      const result = await pb.collection('appointments').getList(1, 1, { // Only need 1 item to get total
+        filter: `date >= "${start}" && date <= "${end}"`,
+      });
+      return result.totalItems; // Return the total count
+    },
+    // Fetch count of new patients created this week (assuming Monday is start of week)
+    fetchNewPatientsThisWeekCount: async (): Promise<number> => {
+      const startOfWeek = getStartOfWeekString();
+      // Filter by creation date >= start of the week
+      const result = await pb.collection('patients').getList(1, 1, { // Only need 1 item to get total
+        filter: `created >= "${startOfWeek}"`,
+      });
+      return result.totalItems;
     },
 
     getById: async (id: string): Promise<ExpandedAppointment> => {
