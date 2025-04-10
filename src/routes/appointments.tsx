@@ -1,38 +1,20 @@
 import { createFileRoute } from '@tanstack/solid-router'
 import { createSignal, For, Show, JSX } from 'solid-js'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/solid-query'
+import { useQuery, useQueryClient } from '@tanstack/solid-query'
 import { dentalOps } from 'src/operations'
-import { format, isToday, isThisWeek, isThisMonth, parseISO, addDays } from 'date-fns'
+import { format, isToday, isThisWeek, isThisMonth, parseISO } from 'date-fns'
+import { Appointment, AppointmentStatus, getAppointmentStatusColor, getAppointmentTypeColor } from 'src/types/appointments'
+import { formatDate, formatTime, formatEndTime, formatDisplayDate, generateCalendarDays } from 'src/utils/appointmetUtils'
 
 export const Route = createFileRoute('/appointments')({
   component: AppointmentsPage,
 })
 
-// Status badge colors
-const STATUS_COLORS = {
-  scheduled: { bg: 'bg-blue-100', text: 'text-blue-800', dot: 'bg-blue-500' },
-  completed: { bg: 'bg-green-100', text: 'text-green-800', dot: 'bg-green-500' },
-  cancelled: { bg: 'bg-red-100', text: 'text-red-800', dot: 'bg-red-500' },
-  noshow: { bg: 'bg-yellow-100', text: 'text-yellow-800', dot: 'bg-yellow-500' },
-  inprogress: { bg: 'bg-purple-100', text: 'text-purple-800', dot: 'bg-purple-500' },
-}
 
-// Type definitions
-type Appointment = {
-  id: string;
-  dateTime: string;
-  type: string;
-  status: 'scheduled' | 'completed' | 'cancelled' | 'noshow' | 'inprogress';
-  duration: number;
-  notes?: string;
-  patient: any;
-  expand?: {
-    patient?: any;
-  };
-}
 
 type DateFilter = 'all' | 'today' | 'week' | 'month' | 'custom';
-type StatusFilter = 'all' | 'scheduled' | 'completed' | 'cancelled' | 'noshow' | 'inprogress';
+// type StatusFilter = 'all' | 'scheduled' | 'completed' | 'cancelled' | 'noshow' | 'inprogress';
+type StatusFilter = 'all' | AppointmentStatus
 type ViewMode = 'list' | 'calendar' | 'agenda';
 
 function AppointmentsPage() {
@@ -50,22 +32,22 @@ function AppointmentsPage() {
   // Fetch appointments data
   const appointmentsQuery = useQuery(() => ({
     queryKey: ['appointments', 'all'],
-    queryFn: () => dentalOps.appointments.getAll,
+    queryFn: () => dentalOps.appointments.getAll(),
     staleTime: 5 * 60 * 1000,
   }));
 
   // Update appointment status mutation
-  const updateStatusMutation = useMutation({
-    mutationFn: dentalOps.appointments.updateAppointmentStatus,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
-      setShowDetailsModal(false);
-    }
-  });
+  // const updateStatusMutation = useMutation({
+  //   mutationFn: dentalOps.appointments.updateAppointmentStatus,
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ['appointments'] });
+  //     setShowDetailsModal(false);
+  //   }
+  // });
 
   // Filter appointments based on search and filters
   const filteredAppointments = () => {
-    let appointments = appointmentsQuery.data?.items || [];
+    let appointments: Appointment[] = appointmentsQuery.data.items || [];
 
     // Apply search filter
     if (searchQuery()) {
@@ -81,7 +63,7 @@ function AppointmentsPage() {
     // Apply date filter
     if (dateFilter() !== 'all') {
       appointments = appointments.filter(apt => {
-        const aptDate = parseISO(apt.dateTime);
+        const aptDate = parseISO(apt.date);
         switch (dateFilter()) {
           case 'today': return isToday(aptDate);
           case 'week': return isThisWeek(aptDate);
@@ -105,7 +87,7 @@ function AppointmentsPage() {
 
     // Sort by date (most recent first)
     return appointments.sort((a, b) =>
-      new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
+      new Date(a.date).getTime() - new Date(b.date).getTime()
     );
   };
 
@@ -113,7 +95,7 @@ function AppointmentsPage() {
   const appointmentsByDate = () => {
     const grouped = {};
     filteredAppointments().forEach(apt => {
-      const dateKey = format(parseISO(apt.dateTime), 'yyyy-MM-dd');
+      const dateKey = format(parseISO(apt.date), 'yyyy-MM-dd');
       if (!grouped[dateKey]) grouped[dateKey] = [];
       grouped[dateKey].push(apt);
     });
@@ -121,16 +103,14 @@ function AppointmentsPage() {
   };
 
   // Helper function to get patient name from appointment object
-  function getPatientName(appointment) {
-    if (appointment.patient?.name) {
-      return appointment.patient.name;
-    } else if (appointment.expand?.patient?.name) {
-      return appointment.expand.patient.name;
-    } else if (appointment.patientName) {
-      return appointment.patientName;
+
+  const getPatientName = (appointment: Appointment): string => {
+    const patient = appointment.expand?.patient;
+    if (patient) {
+      return `${patient.firstName} ${patient.lastName}`;
     }
-    return "Unknown Patient";
-  }
+    return 'Loading Patient...'; // Or fetch separately if needed, but expand is better
+  };
 
   // Handler for opening appointment details
   const handleViewDetails = (appointment: Appointment) => {
@@ -221,12 +201,16 @@ function AppointmentsPage() {
               onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
               class="form-select rounded-md border-gray-300 py-2 pl-3 pr-8 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
             >
+              {/* TODO: Loop through all statuses, add label to enum? */}
               <option value="all">All Statuses</option>
-              <option value="scheduled">Scheduled</option>
-              <option value="inprogress">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="noshow">No Show</option>
+              <option value={AppointmentStatus.Pending}>Pending</option>
+              <option value={AppointmentStatus.Confirmed}>Confirmed</option>
+              <option value={AppointmentStatus.Completed}>Completed</option>
+              <option value={AppointmentStatus.Cancelled}>Cancelled</option>
+              <option value={AppointmentStatus.NoShow}>No Show</option>
+              <option value={AppointmentStatus.Rescheduled}>Rescheduled</option>
+              <option value={AppointmentStatus.Waiting}>Waiting</option>
+              <option value={AppointmentStatus.InProgress}>In Progress</option>
             </select>
           </div>
         </div>
@@ -319,16 +303,36 @@ function AppointmentsPage() {
                               </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                              <div class="text-sm text-gray-900">{formatDate(appointment.dateTime)}</div>
-                              <div class="text-sm text-gray-500">{formatTime(appointment.dateTime)}</div>
+                              <div class="text-sm text-gray-900">{formatDate(appointment.date)}</div>
+                              <div class="text-sm text-gray-500">{formatTime(appointment.date)}</div>
                             </td>
+
+                            {/* <td class="px-6 py-4 whitespace-nowrap"> */}
+                            {/*   <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800 capitalize"> */}
+                            {/*     {appointment.type || 'General'} */}
+                            {/*   </span> */}
+                            {/* </td> */}
+
+                            {/* change type styles based on AppointmentType */}
                             <td class="px-6 py-4 whitespace-nowrap">
-                              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800 capitalize">
+                              <span
+                                class={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                  ${getAppointmentTypeColor(appointment.type).bg || 'bg-gray-100'}
+                                  ${getAppointmentTypeColor(appointment.type).text || 'text-gray-800'}
+                                  capitalize`}
+                              >
                                 {appointment.type || 'General'}
                               </span>
                             </td>
+
+
                             <td class="px-6 py-4 whitespace-nowrap">
-                              <span class={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${STATUS_COLORS[appointment.status]?.bg || 'bg-gray-100'} ${STATUS_COLORS[appointment.status]?.text || 'text-gray-800'} capitalize`}>
+                              <span
+                                class={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                  ${getAppointmentStatusColor(appointment.status).bg || 'bg-gray-100'}
+                                  ${getAppointmentStatusColor(appointment.status).text || 'text-gray-800'}
+                                  capitalize`}
+                              >
                                 {appointment.status}
                               </span>
                             </td>
@@ -369,15 +373,17 @@ function AppointmentsPage() {
                             <li class="px-6 py-4 hover:bg-gray-50 transition-colors">
                               <div class="flex items-center justify-between">
                                 <div class="flex items-center">
-                                  <div class={`flex-shrink-0 w-2 h-12 ${STATUS_COLORS[appointment.status]?.dot || 'bg-gray-300'} mr-4`}></div>
+                                  <div class={`flex-shrink-0 w-2 h-12 ${getAppointmentStatusColor(appointment.status).dot || 'bg-gray-300'} mr-4`}></div>
                                   <div>
-                                    <p class="text-sm font-medium text-gray-900">{formatTime(appointment.dateTime)} - {formatEndTime(appointment.dateTime, appointment.duration || 30)}</p>
+                                    <p class="text-sm font-medium text-gray-900">{formatTime(appointment.date)} - {formatEndTime(appointment.date, appointment.duration || 30)}</p>
                                     <p class="text-md font-semibold text-gray-900">{getPatientName(appointment)}</p>
                                     <div class="flex items-center mt-1">
                                       <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800 capitalize mr-2">
                                         {appointment.type || 'General'}
                                       </span>
-                                      <span class={`px-2 py-1 text-xs rounded-full ${STATUS_COLORS[appointment.status]?.bg || 'bg-gray-100'} ${STATUS_COLORS[appointment.status]?.text || 'text-gray-800'} capitalize`}>
+                                      <span class={`px-2 py-1 text-xs rounded-full ${getAppointmentStatusColor(appointment.status).bg || 'bg-gray-100'} ${getAppointmentStatusColor(
+                                        appointment.status
+                                      ).text || 'text-gray-800'} capitalize`}>
                                         {appointment.status}
                                       </span>
                                     </div>
@@ -434,10 +440,10 @@ function AppointmentsPage() {
                           <For each={getAppointmentsForDay(day.fullDate)}>
                             {(appt: Appointment) => (
                               <div
-                                class={`text-xs p-1 rounded truncate cursor-pointer ${STATUS_COLORS[appt.status]?.bg || 'bg-gray-100'} ${STATUS_COLORS[appt.status]?.text || 'text-gray-800'}`}
+                                class={`text-xs p-1 rounded truncate cursor-pointer ${getAppointmentStatusColor(appt.status).bg || 'bg-gray-100'} ${getAppointmentStatusColor(appt.status).text || 'text-gray-800'}`}
                                 onClick={() => handleViewDetails(appt)}
                               >
-                                {formatTime(appt.dateTime)} - {getPatientName(appt)}
+                                {formatTime(appt.date)} - {getPatientName(appt)}
                               </div>
                             )}
                           </For>
@@ -570,7 +576,7 @@ function LoadingState(): JSX.Element {
   );
 }
 
-function ErrorState(props: { error: any }): JSX.Element {
+function ErrorState(): JSX.Element {
   return (
     <div class="bg-white shadow-md rounded-lg p-8 text-center">
       <svg class="h-12 w-12 text-red-500 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -621,54 +627,6 @@ function EmptyState(): JSX.Element {
   );
 }
 
-// Helper formatting functions
-function formatDate(dateTimeStr: string): string {
-  try {
-    return format(parseISO(dateTimeStr), 'EEE, MMM d, yyyy');
-  } catch (e) {
-    return 'Invalid date';
-  }
-}
-
-function formatDisplayDate(dateStr: string): string {
-  try {
-    const date = parseISO(dateStr);
-    const today = new Date();
-    const tomorrow = addDays(today, 1);
-
-    if (isToday(date)) {
-      return 'Today, ' + format(date, 'MMMM d, yyyy');
-    } else if (
-      date.getDate() === tomorrow.getDate() &&
-      date.getMonth() === tomorrow.getMonth() &&
-      date.getFullYear() === tomorrow.getFullYear()
-    ) {
-      return 'Tomorrow, ' + format(date, 'MMMM d, yyyy');
-    } else {
-      return format(date, 'EEEE, MMMM d, yyyy');
-    }
-  } catch (e) {
-    return 'Invalid date';
-  }
-}
-
-function formatTime(dateTimeStr: string): string {
-  try {
-    return format(parseISO(dateTimeStr), 'h:mm a');
-  } catch (e) {
-    return 'Invalid time';
-  }
-}
-
-function formatEndTime(dateTimeStr: string, durationMinutes: number): string {
-  try {
-    const startTime = parseISO(dateTimeStr);
-    const endTime = new Date(startTime.getTime() + durationMinutes * 60000);
-    return format(endTime, 'h:mm a');
-  } catch (e) {
-    return 'Invalid time';
-  }
-}
 
 function getPatientInitials(name: string): string {
   try {
@@ -683,38 +641,11 @@ function getPatientInitials(name: string): string {
   }
 }
 
-// Calendar helper functions
-function generateCalendarDays() {
-  // In a real implementation, this would generate the calendar days for the current month view
-  // This is a simplified placeholder that shows a week
-  const today = new Date();
-  const days = [];
-
-  // Start with the previous Sunday to create a full week
-  const startDate = new Date(today);
-  startDate.setDate(today.getDate() - today.getDay());
-
-  // Generate 28 days (4 weeks) for demo purposes
-  for (let i = 0; i < 28; i++) {
-    const currentDate = new Date(startDate);
-    currentDate.setDate(startDate.getDate() + i);
-
-    days.push({
-      day: currentDate.getDate(),
-      fullDate: format(currentDate, 'yyyy-MM-dd'),
-      isCurrentMonth: currentDate.getMonth() === today.getMonth(),
-      isToday: isToday(currentDate)
-    });
-  }
-
-  return days;
-}
 
 function getAppointmentsForDay(dateStr: string) {
-  // This would filter appointments based on the date
-  // For now, return a subset of appointments for demo purposes
-  const appointments = appointmentsQuery.data?.items || [];
-  return appointments.filter(apt => {
+  if (!appointmentsQuery.data) return [];
+
+  return appointmentsQuery.data.filter(apt => {
     try {
       return format(parseISO(apt.dateTime), 'yyyy-MM-dd') === dateStr;
     } catch (e) {
@@ -728,7 +659,7 @@ export function AppointmentStats() {
   // Query for appointments stats
   const appointmentsStatsQuery = useQuery(() => ({
     queryKey: ['appointments', 'stats'],
-    queryFn: dentalOps.appointments.fetchAppointmentsStats,
+    queryFn: () => dentalOps.appointments.fetchAppointmentsStats(),
     staleTime: 15 * 60 * 1000,
   }));
 

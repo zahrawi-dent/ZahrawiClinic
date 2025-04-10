@@ -44,3 +44,4 @@ export function getEndOfDayString(): string {
 export function getStartOfWeekString(): string {
   return formatDateForPB(getStartOfWeekUTC());
 }
+

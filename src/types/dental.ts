@@ -52,32 +52,6 @@ export interface Procedure extends BaseRecord {
   // Add any other procedure-specific fields
 }
 
-// Enum for Appointment Status
-export enum AppointmentStatus {
-  Pending = 'pending',
-  Confirmed = 'confirmed',
-  Completed = 'completed',
-  Cancelled = 'cancelled',
-  NoShow = 'no_show',
-  Rescheduled = 'rescheduled',
-  Waiting = 'waiting',
-
-}
-
-export interface Appointment extends BaseRecord {
-  date: string; // ISO date string
-  status?: AppointmentStatus;
-  reasonForVisit?: string;
-  patient: string; // Relation ID (Patient ID)
-  dentist: string; // Relation ID (Dentist ID)
-  notes?: string; // Editor content (HTML string)
-  duration?: string;
-  // --- Crucial for getting patient name easily ---
-  expand?: {
-    patient?: Patient; // The expanded patient record
-    dentist?: Dentist;
-  };
-}
 
 
 export interface Treatment extends BaseRecord {

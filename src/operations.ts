@@ -5,14 +5,12 @@ import type { ListResult, RecordModel } from 'pocketbase' // Use RecordModel as 
 import {
   type Patient,
   type PatientData,
-  type PatientWithAppointments,
   type PatientWithTreatments,
   type PatientWithBalance,
   type PatientBalance,
   type Dentist,
   type DentistData,
   type DentistScheduleItem,
-  type Appointment,
   type AppointmentData,
   type ExpandedAppointment,
   type Treatment,
@@ -23,6 +21,8 @@ import {
   type Procedure, // Assuming Procedure type might be needed indirectly
   Collections
 } from './types/dental' // Adjust path as needed
+import { type Appointment } from './types/appointments'
+
 import { getEndOfDayString, getStartOfDayString, getStartOfWeekString } from './utils/dateUtils'
 
 const pb = new PocketBase('http://127.0.0.1:8090')
@@ -351,20 +351,22 @@ export class DentalOperations {
       }
     },
 
-    getAll: async (page = 1, perPage = 100): Promise<ExpandedAppointment[]> => {
+    getAll: async (page = 1, perPage = 100): Promise<PaginatedResult<Appointment>> => {
       try {
         const result = await this.collection<Appointment>('appointments').getList(page, perPage, {
-          sort: '-appointmentDate,+startTime',
+          sort: '-date',
           expand: 'patient,dentist' // Expand both
         })
 
-        return result.items.map(this.mapToExpandedAppointment) // Use helper mapper
+        // return result.items.map(this.mapToExpandedAppointment) // Use helper mapper
+        return result
+        // return result
       } catch (error) {
         handleError(error, 'Error fetching appointments')
       }
     },
 
-    fetchRecentAppointments: async (): Promise<PaginatedResult<ExpandedAppointment>> => {
+    fetchRecentAppointments: async (): Promise<PaginatedResult<Appointment>> => {
       const result = await pb.collection('appointments').getList<Appointment>(1, 5, { // Page 1, 5 per page
         sort: '-date', // Sort by date/time descending (most recent first)
         expand: 'patient', // IMPORTANT: Expand the patient relation
@@ -485,7 +487,38 @@ export class DentalOperations {
       } catch (error) {
         handleError(error, 'Error checking for appointment conflicts')
       }
-    }
+    },
+
+    fetchAppointmentsStats: async (): Promise<{ total: number; completed: number; cancelled: number; noShows: number }> => {
+      try {
+        // Get total appointments
+        const totalResult = await this.collection<Appointment>('appointments').getList(1, 1);
+        const total = totalResult.totalItems;
+
+        // Get completed appointments
+        const completedResult = await this.collection<Appointment>('appointments').getList(1, 1, {
+          filter: 'status = "completed"'
+        });
+        const completed = completedResult.totalItems;
+
+        // Get cancelled appointments
+        const cancelledResult = await this.collection<Appointment>('appointments').getList(1, 1, {
+          filter: 'status = "cancelled"'
+        });
+        const cancelled = cancelledResult.totalItems;
+
+        // Get no-show appointments
+        const noShowsResult = await this.collection<Appointment>('appointments').getList(1, 1, {
+          filter: 'status = "noshow"'
+        });
+        const noShows = noShowsResult.totalItems;
+
+        return { total, completed, cancelled, noShows };
+      } catch (error) {
+        handleError(error, 'Error fetching appointment statistics');
+        return { total: 0, completed: 0, cancelled: 0, noShows: 0 };
+      }
+    },
   }
 
   // ===== TREATMENT OPERATIONS ===== (Added based on Patient methods)
