@@ -49,12 +49,20 @@ export function formatEndTime(dateTimeStr: string, durationMinutes: number): str
   }
 }
 
+// day type
+export type Day = {
+  day: number;
+  fullDate: string;
+  isCurrentMonth: boolean;
+  isToday: boolean;
+};
+
 // Calendar helper functions
-export function generateCalendarDays() {
+export function generateCalendarDays(): Day[] {
   // In a real implementation, this would generate the calendar days for the current month view
   // This is a simplified placeholder that shows a week
   const today = new Date();
-  const days = [];
+  const days: { day: number; fullDate: string; isCurrentMonth: boolean; isToday: boolean }[] = [];
 
   // Start with the previous Sunday to create a full week
   const startDate = new Date(today);
