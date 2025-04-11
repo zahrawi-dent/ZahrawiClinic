@@ -1,8 +1,12 @@
 // Sidebar.jsx
-import { For, JSX } from 'solid-js';
-import { Link } from '@tanstack/solid-router';
+import { createMemo, For, JSX } from 'solid-js';
+import { Link, useMatch, useMatchRoute } from '@tanstack/solid-router';
 
-const Sidebar = (props: { logout: () => void }) => {
+const Sidebar = (props: {
+  logout: () => void,
+  userName?: string,
+  userRole?: string
+}) => {
   const menuItems = [
     // Use end: true for the root path to avoid it matching every other path
     { path: '/', label: 'Dashboard', icon: 'home', end: true },
@@ -40,16 +44,23 @@ const Sidebar = (props: { logout: () => void }) => {
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
       ),
+      logout: (
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+      ),
+      user: (
+        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      )
     };
-
     return icons[iconName] || null;
   };
 
-
   return (
-    // Added flex flex-col to make nav scrollable if needed
     <div class="bg-indigo-800 text-white w-64 flex-shrink-0 flex flex-col h-screen">
-      {/* Header section - Added flex-shrink-0 */}
+      {/* Header section */}
       <div class="flex items-center space-x-2 p-4 mb-2 flex-shrink-0">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 01-2 2z" />
@@ -61,31 +72,40 @@ const Sidebar = (props: { logout: () => void }) => {
         </div>
       </div>
 
-      {/* Removed redundant div wrapper */}
-      {/* Navigation - Added flex-grow and overflow-y-auto */}
-      <nav class="mt-8 flex-grow overflow-y-auto">
+      {/* Navigation - main menu items */}
+      <nav class="mt-4 flex-grow overflow-y-auto">
         <For each={menuItems}>
           {(item) => (
             <NavItem
               href={item.path}
               label={item.label}
               icon={renderIcon(item.icon)}
-              // Pass the 'end' prop down if it exists
               end={item.end}
             />
           )}
         </For>
-        {/* Logout Button - consider adding an icon too */}
+      </nav>
+
+      {/* User profile and logout section at the bottom */}
+      <div class="mt-auto border-t border-indigo-700 pt-2 pb-4 px-4">
+        <div class="flex items-center p-2 mb-4">
+          <div class="mr-3 bg-indigo-900 p-1 rounded-full">
+            {renderIcon('user')}
+          </div>
+          <div>
+            <div class="font-semibold">{props.userName || 'Admin User'}</div>
+            <div class="text-xs text-indigo-300">{props.userRole || 'Administrator'}</div>
+          </div>
+        </div>
+
         <button
           onClick={props.logout}
-          class="flex items-center w-full px-4 py-3 mt-4 text-indigo-200 hover:bg-indigo-900 hover:text-white transition-colors"
+          class="flex items-center w-full px-4 py-3 text-indigo-200 hover:bg-indigo-900 hover:text-white transition-colors rounded"
         >
-          <span class="mr-2 w-5 text-center"> {/* Added for alignment like NavItem */}
-            <i class="fas fa-sign-out-alt"></i> {/* Example Logout Icon */}
-          </span>
-          <span>Logout</span> {/* Removed extra ml-2 */}
+          <span class="mr-3">{renderIcon('logout')}</span>
+          <span>Logout</span>
         </button>
-      </nav>
+      </div>
     </div>
   );
 };
@@ -98,17 +118,17 @@ function NavItem(props: {
   icon: JSX.Element;
   end?: boolean;
 }) {
+
+
+
   return (
     <Link
       to={props.href}
-      // Base classes
-      class="flex items-center px-4 py-3 text-indigo-200 hover:bg-indigo-900 hover:text-white transition-colors"
-      // --- MARKER: Active Class ---
-      // This class will be added when the link's href matches the current route
-      activeClass="bg-indigo-900 text-white font-semibold" // Added font-semibold for extra emphasis
-      // Use the 'end' prop to ensure exact match (especially needed for '/')
-      // Defaults to false if not provided
-      end={props.end}
+      // Dynamic classes based on active state 
+      class={`
+        flex items-center px-4 py-3 transition-colors
+            'text-indigo-200 hover:bg-indigo-700 hover:text-white'}
+      `}
     >
       <div class="flex items-center">
         <span class="mr-3">{props.icon}</span>
@@ -117,3 +137,8 @@ function NavItem(props: {
     </Link>
   );
 }
+
+// ${isActive()
+//   ?
+//     'bg-indigo-900 text-white font-semibold'
+//   // :
