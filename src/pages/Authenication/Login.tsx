@@ -11,6 +11,7 @@ export default function LoginPage({ onConnect }: { onConnect: () => void }) {
   const [showPassword, setShowPassword] = createSignal(false);
   const [isRestoring, setIsRestoring] = createSignal(true);
 
+
   onMount(() => {
     // Try to restore previous connection
     if (restoreConnection()) {
@@ -36,7 +37,9 @@ export default function LoginPage({ onConnect }: { onConnect: () => void }) {
       const pb = createPocketBaseClient(url);
 
       // Authenticate with admin credentials
-      await loginAdmin(email(), password());
+      await loginAdmin(email(), password()).catch((err) => {
+        throw new Error(err.message);
+      });
 
       // Store connection details
       persistConnection(url);
@@ -49,7 +52,9 @@ export default function LoginPage({ onConnect }: { onConnect: () => void }) {
     } finally {
       setIsLoading(false);
     }
+
   };
+
 
   return (
     <>
@@ -182,6 +187,9 @@ export default function LoginPage({ onConnect }: { onConnect: () => void }) {
                 </button>
               </div>
             </form>
+            <textarea value={loggin()} >
+
+            </textarea>
 
             <div class="mt-4 text-sm text-gray-600">
               <p class="text-center">Don't have a PocketBase instance?</p>
