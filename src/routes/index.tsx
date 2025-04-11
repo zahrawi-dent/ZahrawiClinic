@@ -75,6 +75,46 @@ function Index() {
         />
       </div>
 
+      {/* Quick Actions */}
+      <div class="bg-white rounded-lg shadow transition-all duration-300 hover:shadow-md mb-8">
+        <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-medium text-gray-900">Quick Actions</h2>
+        </div>
+        <div class="p-4 sm:p-6">
+          <div class="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+            <ActionButton
+              to="/new-appointment"
+              label="New Appointment"
+              bgColor="bg-indigo-600"
+              hoverColor="bg-indigo-700"
+              icon="📝"
+            />
+            <ActionButton
+              to="/register-patient"
+              label="Register Patient"
+              bgColor="bg-green-600"
+              hoverColor="bg-green-700"
+              icon="👥"
+            />
+            <ActionButton
+              to="/invoices/new"
+              label="Create Invoice"
+              bgColor="bg-blue-600"
+              hoverColor="bg-blue-700"
+              icon="📄"
+              preload={false}
+            />
+            <ActionButton
+              to="/schedule"
+              label="View Schedule"
+              bgColor="bg-purple-600"
+              hoverColor="bg-purple-700"
+              icon="🗓️"
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Recent Appointments */}
       <div class="bg-white rounded-lg shadow mb-8 transition-all duration-300 hover:shadow-md">
         <div class="px-4 sm:px-6 py-4 border-b border-gray-200 flex justify-between items-center">
@@ -121,45 +161,6 @@ function Index() {
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div class="bg-white rounded-lg shadow transition-all duration-300 hover:shadow-md">
-        <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
-          <h2 class="text-lg font-medium text-gray-900">Quick Actions</h2>
-        </div>
-        <div class="p-4 sm:p-6">
-          <div class="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-            <ActionButton
-              to="/new-appointment"
-              label="New Appointment"
-              bgColor="bg-indigo-600"
-              hoverColor="bg-indigo-700"
-              icon="📝"
-            />
-            <ActionButton
-              to="/register-patient"
-              label="Register Patient"
-              bgColor="bg-green-600"
-              hoverColor="bg-green-700"
-              icon="👥"
-            />
-            <ActionButton
-              to="/invoices/new"
-              label="Create Invoice"
-              bgColor="bg-blue-600"
-              hoverColor="bg-blue-700"
-              icon="📄"
-              preload={false}
-            />
-            <ActionButton
-              to="/schedule"
-              label="View Schedule"
-              bgColor="bg-purple-600"
-              hoverColor="bg-purple-700"
-              icon="🗓️"
-            />
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

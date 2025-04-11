@@ -27,8 +27,19 @@ import { getEndOfDayString, getStartOfDayString, getStartOfWeekString } from './
 
 const pb = new PocketBase('http://127.0.0.1:8090')
 
-await pb.collection('_superusers').authWithPassword('muhammadatefsw@gmail.com', '3jwfk39v8eu9EJg')
+//await pb.collection('_superusers').authWithPassword('muhammadatefsw@gmail.com', '3jwfk39v8eu9EJg')
 
+
+async function setup() {
+
+  await pb.collection('_superusers').authWithPassword('muhammadatefsw@gmail.com', '3jwfk39v8eu9EJg')
+}
+
+setup().then(() => {
+  console.log('Setup completed.')
+}).catch((error) => {
+  console.error('Setup failed:', error)
+})
 // Structure returned by PocketBase getList
 export interface PaginatedResult<T> {
   page: number;
@@ -665,6 +676,3 @@ export class DentalOperations {
 }
 
 export const dentalOps = new DentalOperations()
-
-// Export an instance if you prefer singleton usage, or the class itself
-// export const dentalApi = new DentalOperations();

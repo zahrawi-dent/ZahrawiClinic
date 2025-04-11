@@ -62,6 +62,7 @@ export interface Appointment extends BaseRecord {
 }
 
 export function getAppointmentTypeColor(type: AppointmentType): { bg: string, text: string, dot: string } {
+  console.log('-----------------------------', type)
   switch (type) {
     case AppointmentType.CheckupRoutineExam: return { bg: 'bg-blue-100', text: 'text-blue-800', dot: 'bg-blue-500' };
     case AppointmentType.CleaningHygiene: return { bg: 'bg-green-100', text: 'text-green-800', dot: 'bg-green-500' };
@@ -83,8 +84,20 @@ export function getAppointmentTypeColor(type: AppointmentType): { bg: string, te
     case AppointmentType.Bonding: return { bg: 'bg-indigo-100', text: 'text-indigo-800', dot: 'bg-indigo-500' };
     case AppointmentType.Orthodontics: return { bg: 'bg-teal-100', text: 'text-teal-800', dot: 'bg-teal-500' };
     case AppointmentType.PeriodontalMaintenance: return { bg: 'bg-orange-100', text: 'text-orange-800', dot: 'bg-orange-500' };
+    case AppointmentType.OralSurgeryProcedure: return { bg: 'bg-lime-100', text: 'text-lime-800', dot: 'bg-lime-500' };
+    case AppointmentType.InvisalignOrthodonticAdjustment: return { bg: 'bg-rose-100', text: 'text-rose-800', dot: 'bg-rose-500' };
+    case AppointmentType.EmergencyVisit: return { bg: 'bg-fuchsia-100', text: 'text-fuchsia-800', dot: 'bg-fuchsia-500' };
+    case AppointmentType.FollowUp: return { bg: 'bg-cyan-100', text: 'text-cyan-800', dot: 'bg-cyan-500' };
+
+    case AppointmentType.PediatricExam: return { bg: 'bg-sky-100', text: 'text-sky-800', dot: 'bg-sky-500' };
+    case AppointmentType.DentalExamination: return { bg: 'bg-amber-100', text: 'text-amber-800', dot: 'bg-amber-500' };
+    case AppointmentType.OralSurgeryConsultation: return { bg: 'bg-pink-100', text: 'text-pink-800', dot: 'bg-pink-500' };
+    case AppointmentType.PeriodontalTreatment: return { bg: 'bg-teal-100', text: 'text-teal-800', dot: 'bg-teal-500' };
+
+
 
     case AppointmentType.Other: return { bg: 'bg-gray-100', text: 'text-gray-800', dot: 'bg-gray-500' };
+    default: return { bg: 'bg-gray-100', text: 'text-gray-800', dot: 'bg-gray-500' };
   }
 }
 

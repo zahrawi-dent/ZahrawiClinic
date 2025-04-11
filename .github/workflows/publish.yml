@@ -1,6 +1,9 @@
 name: Release
 on: 
-  workflow_dispatch:
+  # workflow_dispatch:
+  push:
+      tags:
+        - 'v*.*.*' # Triggers when a tag like v1.0.0 is pushed
 
 env:
   CARGO_TERM_COLOR: always
