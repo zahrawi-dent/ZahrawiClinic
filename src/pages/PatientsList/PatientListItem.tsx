@@ -4,6 +4,7 @@ import { JSX } from 'solid-js'
 import { Patient } from 'src/types/dental';
 
 
+// <Link to={`/patients/${props.patient.id}`} class="block hover:bg-gray-50">
 export default function PatientListItem(props: { patient: Patient }): JSX.Element {
   return (
     <li>

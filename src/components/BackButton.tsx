@@ -1,16 +1,16 @@
-import { useNavigate } from '@solidjs/router'
+import { useNavigate } from '@tanstack/solid-router'
 import { JSX } from 'solid-js'
 
-function BackButton(props): JSX.Element {
+function BackButton(props: { to?: string, class?: string, label?: string }): JSX.Element {
   const navigate = useNavigate()
 
   const goBack = (): void => {
     if (props.to) {
       // Navigate to specific route if provided
-      navigate(props.to)
+      navigate({ to: props.to, replace: true }).catch(() => { })
     } else {
       // Go back in history
-      navigate(-1)
+      // navigate({ to: -1, replace: true }).catch(() => { })
     }
   }
 

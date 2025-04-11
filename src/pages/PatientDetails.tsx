@@ -1,10 +1,9 @@
 import { createSignal, For, JSX, Show } from 'solid-js'
-import { A, useNavigate, useParams } from '@solidjs/router'
+import { Link, useNavigate } from '@tanstack/solid-router'
 import DeletePatientDialog from '../pages/Patients/DeletePatientDialog'
 import { dentalOps } from 'src/operations'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/solid-query'
-export default function PatientDetails(): JSX.Element {
-  const params = useParams();
+export default function PatientDetails(props: { patientId: string }): JSX.Element {
   const navigate = useNavigate();
   const queryClient = useQueryClient(); // Get query client instance
 
@@ -15,12 +14,12 @@ export default function PatientDetails(): JSX.Element {
 
   // Query for Patient Details
   const patientDetailsQuery = useQuery(() => ({
-    queryKey: ['patient-details', params.id],
+    queryKey: ['patient-details', props.patientId],
     queryFn: async () => {
-      const patient = await dentalOps.patients.getById(params.id);
+      const patient = await dentalOps.patients.getById(props.patientId);
       // Optional: Throw an error if patient not found to trigger isError state
       if (!patient) {
-        throw new Error(`Patient with ID ${params.id} not found.`);
+        throw new Error(`Patient with ID ${props.patientId} not found.`);
       }
       return patient;
     },
@@ -29,24 +28,25 @@ export default function PatientDetails(): JSX.Element {
 
   // Query for Appointments (enabled only when patient ID is available)
   const appointmentsQuery = useQuery(() => ({
-    queryKey: ['patient-appointments', params.id],
-    queryFn: () => dentalOps.patients.getWithAppointments(params.id),
-    enabled: !!params.id // Fetch only when params.id is truthy
+    queryKey: ['patient-appointments', props.patientId],
+    queryFn: () => dentalOps.patients.getWithAppointments(props.patientId),
+    enabled: !!props.patientId // Fetch only when props.patientId is truthy
     // Or, if you only want to fetch after patient details are confirmed:
     // enabled: patientDetailsQuery.isSuccess && !!patientDetailsQuery.data
   }));
   // Query for Treatments
   const treatmentsQuery = useQuery(() => ({
-    queryKey: ['patient-treatments', params.id],
-    queryFn: () => dentalOps.treatments.getById(params.id),
-    enabled: !!params.id
+    queryKey: ['patient-treatments', props.patientId],
+    queryFn: () => dentalOps.treatments.getById(props.patientId),
+    enabled: !!props.patientId
   }));
 
   // Query for Invoices
   const invoicesQuery = useQuery(() => ({
-    queryKey: ['patient-invoices', params.id],
-    queryFn: () => dentalOps.invoices.getById(params.id),
-    enabled: !!params.id
+    queryKey: ['patient-invoices', props.patientId],
+    // TODO: add invoices
+    queryFn: () => dentalOps.invoices.getById(props.patientId),
+    enabled: !!props.patientId
   }));
 
   // --- Mutation ---
@@ -56,14 +56,14 @@ export default function PatientDetails(): JSX.Element {
     mutationFn: (patientId: string) => dentalOps.patients.delete(patientId),
     onSuccess: () => {
       // Invalidate queries that might be affected (e.g., a patient list query)
-      queryClient.invalidateQueries({ queryKey: ['patients'] }); // Assuming you have a ['patients'] query elsewhere
-      queryClient.removeQueries({ queryKey: ['patient-details', params.id] }); // Remove specific patient data
-      queryClient.removeQueries({ queryKey: ['patient-appointments', params.id] });
-      queryClient.removeQueries({ queryKey: ['patient-treatments', params.id] });
-      queryClient.removeQueries({ queryKey: ['patient-invoices', params.id] });
+      queryClient.invalidateQueries({ queryKey: ['patients'] }).catch(() => { }); // Assuming you have a ['patients'] query elsewhere
+      queryClient.removeQueries({ queryKey: ['patient-details', props.patientId] }); // Remove specific patient data
+      queryClient.removeQueries({ queryKey: ['patient-appointments', props.patientId] });
+      queryClient.removeQueries({ queryKey: ['patient-treatments', props.patientId] });
+      queryClient.removeQueries({ queryKey: ['patient-invoices', props.patientId] });
 
       console.log('Patient deleted successfully, navigating...');
-      navigate('/patients'); // Navigate back to patients list
+      navigate({ to: '/patients', replace: true }).catch(() => { })
     },
     onError: (error) => {
       console.error('Error deleting patient:', error);
@@ -77,7 +77,7 @@ export default function PatientDetails(): JSX.Element {
   }));
 
   const handleDeleteConfirm = () => {
-    deletePatientMutation.mutate(params.id);
+    deletePatientMutation.mutate(props.patientId);
   };
 
   const tabs = [
@@ -137,12 +137,13 @@ export default function PatientDetails(): JSX.Element {
                   </div>
                 </div>
                 <div class="ml-auto flex">
-                  <A
-                    href={`/edit-patient/${params.id}`} // Use params.id directly
+                  {/* TODO: pass the patient object instead of refetching it in EditPatient */}
+                  <Link
+                    to={`/patients/${props.patientId}/edit`}
                     class="mr-3 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
                   >
                     Edit Patient
-                  </A>
+                  </Link>
                   <button
                     onClick={() => setDeleteDialogOpen(true)}
                     disabled={deletePatientMutation.isPending} // Disable while deleting
@@ -150,13 +151,17 @@ export default function PatientDetails(): JSX.Element {
                   >
                     {deletePatientMutation.isPending ? 'Deleting...' : 'Delete Patient'}
                   </button>
-                  <A
+                  <Link
                     // Pass patient data if needed, or just navigate
-                    href={`/new-appointment?patientId=${patient().id}&patientName=${patient().firstName} ${patient().lastName}`} // Example: pass patientId
+                    to={`/appointments/new`}
+                    search={{
+                      patientId: props.patientId,
+                      patientName: `${patient().firstName} ${patient().lastName}`
+                    }}
                     class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
                   >
                     New Appointment
-                  </A>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -276,9 +281,9 @@ export default function PatientDetails(): JSX.Element {
                   <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-medium text-gray-900">Upcoming Appointments</h3>
                     {/* Link to new appointment page */}
-                    <A href={`/new-appointment?patientId=${patient().id}`} class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                    <Link to={`/new-appointment?patientId=${patient().id}`} class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
                       Schedule New
-                    </A>
+                    </Link>
                   </div>
 
                   <Show when={appointmentsQuery.isLoading}> <p>Loading appointments...</p> </Show>
@@ -495,7 +500,7 @@ export default function PatientDetails(): JSX.Element {
           </>
         )}
       </Show>
-    </div>
+    </div >
   );
 
 }
@@ -518,19 +523,19 @@ export default function PatientDetails(): JSX.Element {
 //
 //
 //   // const patientDetails = useQuery(() => ({
-//   //   queryKey: ['patient-details', params.id],
-//   //   queryFn: () => dentalOps.patients.getById(params.id)
+//   //   queryKey: ['patient-details', props.patientId],
+//   //   queryFn: () => dentalOps.patients.getById(props.patientId)
 //   // }))
 //   // setPatient(patientDetails.data)
 //
 //   // Query for Patient Details
 //   const patientDetailsQuery = useQuery(() => ({
-//     queryKey: ['patient-details', params.id],
+//     queryKey: ['patient-details', props.patientId],
 //     queryFn: async () => {
-//       const patient = await dentalOps.patients.getById(params.id);
+//       const patient = await dentalOps.patients.getById(props.patientId);
 //       // Optional: Throw an error if patient not found to trigger isError state
 //       if (!patient) {
-//         throw new Error(`Patient with ID ${params.id} not found.`);
+//         throw new Error(`Patient with ID ${props.patientId} not found.`);
 //       }
 //       return patient;
 //     },
@@ -540,25 +545,25 @@ export default function PatientDetails(): JSX.Element {
 //
 //   // Query for Appointments (enabled only when patient ID is available)
 //   const appointmentsQuery = useQuery(() => ({
-//     queryKey: ['patient-appointments', params.id],
-//     queryFn: () => dentalOps.appointments.getById(params.id),
-//     enabled: !!params.id // Fetch only when params.id is truthy
+//     queryKey: ['patient-appointments', props.patientId],
+//     queryFn: () => dentalOps.appointments.getById(props.patientId),
+//     enabled: !!props.patientId // Fetch only when props.patientId is truthy
 //     // Or, if you only want to fetch after patient details are confirmed:
 //     // enabled: patientDetailsQuery.isSuccess && !!patientDetailsQuery.data
 //   }));
 //
 //   // Query for Treatments
 //   const treatmentsQuery = useQuery(() => ({
-//     queryKey: ['patient-treatments', params.id],
-//     queryFn: () => dentalOps.treatments.getById(params.id),
-//     enabled: !!params.id
+//     queryKey: ['patient-treatments', props.patientId],
+//     queryFn: () => dentalOps.treatments.getById(props.patientId),
+//     enabled: !!props.patientId
 //   }));
 //
 //   // Query for Invoices
 //   const invoicesQuery = useQuery(() => ({
-//     queryKey: ['patient-invoices', params.id],
-//     queryFn: () => dentalOps.invoices.getByPatientId(params.id),
-//     enabled: !!params.id
+//     queryKey: ['patient-invoices', props.patientId],
+//     queryFn: () => dentalOps.invoices.getByPatientId(props.patientId),
+//     enabled: !!props.patientId
 //   }));
 //
 //   // Mutation for Deleting Patient
@@ -567,10 +572,10 @@ export default function PatientDetails(): JSX.Element {
 //     onSuccess: () => {
 //       // Invalidate queries that might be affected (e.g., a patient list query)
 //       queryClient.invalidateQueries({ queryKey: ['patients'] }); // Assuming you have a ['patients'] query elsewhere
-//       queryClient.removeQueries({ queryKey: ['patient-details', params.id] }); // Remove specific patient data
-//       queryClient.removeQueries({ queryKey: ['patient-appointments', params.id] });
-//       queryClient.removeQueries({ queryKey: ['patient-treatments', params.id] });
-//       queryClient.removeQueries({ queryKey: ['patient-invoices', params.id] });
+//       queryClient.removeQueries({ queryKey: ['patient-details', props.patientId] }); // Remove specific patient data
+//       queryClient.removeQueries({ queryKey: ['patient-appointments', props.patientId] });
+//       queryClient.removeQueries({ queryKey: ['patient-treatments', props.patientId] });
+//       queryClient.removeQueries({ queryKey: ['patient-invoices', props.patientId] });
 //
 //       console.log('Patient deleted successfully, navigating...');
 //       navigate('/patients'); // Navigate back to patients list
@@ -588,11 +593,11 @@ export default function PatientDetails(): JSX.Element {
 //
 //   const handleDeleteConfirm = () => {
 //     // Ensure id is a number before mutating
-//     const patientId = parseInt(params.id);
+//     const patientId = parseInt(props.patientId);
 //     if (!isNaN(patientId)) {
 //       deletePatientMutation.mutate(patientId);
 //     } else {
-//       console.error("Invalid patient ID for deletion:", params.id);
+//       console.error("Invalid patient ID for deletion:", props.patientId);
 //       // Handle invalid ID case if necessary
 //       setDeleteDialogOpen(false);
 //     }
@@ -602,7 +607,7 @@ export default function PatientDetails(): JSX.Element {
 //
 //   // const handleDeletePatient = async (): Promise<void> => {
 //   //   try {
-//   //     await window.dentalApi.deletePatient(parseInt(params.id))
+//   //     await window.dentalApi.deletePatient(parseInt(props.patientId))
 //   //     // Navigate back to patients list after deletion
 //   //     navigate('/patients')
 //   //   } catch (error) {
@@ -612,13 +617,13 @@ export default function PatientDetails(): JSX.Element {
 //   // }
 //
 //
-//   // setAppointments(await mockApi.getPatientAppointments(parseInt(params.id)))
+//   // setAppointments(await mockApi.getPatientAppointments(parseInt(props.patientId)))
 //
 //   // onMount(async () => {
 //   //
 //   //   try {
 //   //     const patientData: Patient | undefined = await dentalOps.patients.getById(
-//   //       params.id
+//   //       props.patientId
 //   //     )
 //   //     if (!patientData) {
 //   //       throw new Error('Patient not found')
@@ -626,7 +631,7 @@ export default function PatientDetails(): JSX.Element {
 //   //     setPatient(patientData)
 //   //
 //   //     // In a real app, these would be separate API calls
-//   //     setAppointments(await mockApi.getPatientAppointments(parseInt(params.id)))
+//   //     setAppointments(await mockApi.getPatientAppointments(parseInt(props.patientId)))
 //   //
 //   //     setTreatments([
 //   //       {
@@ -737,7 +742,7 @@ export default function PatientDetails(): JSX.Element {
 //               </div>
 //               <div class="ml-auto flex">
 //                 <A
-//                   href={`/edit-patient/${params.id}`}
+//                   href={`/edit-patient/${props.patientId}`}
 //                   class="mr-3 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
 //                 >
 //                   Edit Patient

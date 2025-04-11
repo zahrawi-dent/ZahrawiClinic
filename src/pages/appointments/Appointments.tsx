@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/solid-router'
-import { createEffect, createSignal, Match, Show, Switch } from 'solid-js'
+import { createEffect, Match, Show, Switch } from 'solid-js'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/solid-query'
 import { dentalOps } from 'src/operations'
 import { Appointment } from 'src/types/appointments'
@@ -121,61 +121,6 @@ function AppointmentsPage() {
           onStatusUpdate={handleStatusUpdate}
           updating={updateStatusMutation.isLoading}
         />
-      </Show>
-    </div>
-  );
-
-  return (
-    <div class="max-w-7xl mx-auto px-4 py-6">
-      <AppointmentStats />
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-0">Appointments</h1>
-        <button
-          onClick={() => window.location.href = '/new-appointment'}
-          class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md flex items-center shadow-sm transition-colors"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-          New Appointment
-        </button>
-      </div>
-
-      {/* Filters and Search */}
-      <div class="bg-white rounded-lg shadow-md p-4 mb-6">
-        <FilterSearch />
-
-        {/* View Type Selector */}
-        <ViewTypeSelector filteredAppointments={selectors.filteredAppointments} appointmentsQuery={appointmentsQuery} />
-      </div>
-
-      {/* Content Area */}
-      <Show when={!appointmentsQuery.isLoading} fallback={<LoadingState />}>
-        <Show when={!appointmentsQuery.isError} fallback={<ErrorState error={appointmentsQuery.error} />}>
-          <Show when={selectors.filteredAppointments.length > 0} fallback={<EmptyState setSearchQuery={actions.setSearchQuery} setDateFilter={actions.setDateFilter} setStatusFilter={actions.setStatusFilter} />}>
-            {/* List View */}
-            <Show when={appointmentsStore.viewMode === 'list'}>
-              <ListView filteredAppointments={selectors.filteredAppointments} handleViewDetails={handleViewDetails} />
-            </Show>
-
-            {/* Agenda View */}
-            <Show when={appointmentsStore.viewMode === 'agenda'}>
-              <AgendaView handleViewDetails={handleViewDetails} appointmentsByDate={selectors.appointmentsByDate} />
-            </Show>
-
-            {/* Calendar View */}
-            <Show when={appointmentsStore.viewMode === 'calendar'}>
-              <CalendarView handleViewDetails={handleViewDetails} getAppointmentsForDay={selectors.getAppointmentsForDay} />
-            </Show>
-          </Show>
-        </Show>
-      </Show>
-
-      {/* Appointment Details Modal */}
-
-      <Show when={appointmentsStore.showDetailsModal}>
-        {/* <AppointmentDetails selectedAppointment={appointmentsStore.selectedAppointment} setShowDetailsModal={setShowDetailsModal} handleStatusUpdate={handleStatusUpdate} updateStatusMutation={updateStatusMutation} /> */}
-        <AppointmentDetails handleStatusUpdate={handleStatusUpdate} updateStatusMutation={updateStatusMutation} />
       </Show>
     </div>
   );

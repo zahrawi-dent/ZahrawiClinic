@@ -342,7 +342,7 @@ export class DentalOperations {
 
   // ===== APPOINTMENT OPERATIONS =====
   appointments = {
-    create: async (appointmentData: AppointmentData): Promise<Appointment> => {
+    create: async (appointmentData: Appointment): Promise<Appointment> => {
       try {
         // Add validation for overlapping times if needed *before* creating
         return await this.collection<Appointment>('appointments').create(appointmentData)
