@@ -1,10 +1,10 @@
 import { createSignal, createEffect, JSX, For, Show, onCleanup } from 'solid-js'
-import { A, useNavigate } from '@solidjs/router'
+import { useNavigate } from '@tanstack/solid-router'
 import { dentalOps } from 'src/operations'
 import { useQuery } from '@tanstack/solid-query'
+import { Link } from '@tanstack/solid-router'
 
 export default function PatientsList(): JSX.Element {
-  // const [patients, setPatients] = createSignal<Patient[]>([])
   const [isSearchOpen, setIsSearchOpen] = createSignal(false)
   const [searchTerm, setSearchTerm] = createSignal('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = createSignal(''); // Value used for query
@@ -21,7 +21,6 @@ export default function PatientsList(): JSX.Element {
   const patientsQuery = useQuery(() => ({
     queryKey: ['patients'], // Unique key for the full list
     queryFn: () => dentalOps.patients.getAll(),
-    // staleTime: 1000 * 60 * 5 // Optional: Cache for 5 minutes
   }));
 
   // Query for search results - depends on debouncedSearchTerm
@@ -35,6 +34,7 @@ export default function PatientsList(): JSX.Element {
     // For v4, manage placeholder data manually if needed or accept flicker
     // placeholderData: [], // You could provide placeholder data
   }));
+
 
 
   // Update debounced term on input change (with debounce)
@@ -127,7 +127,7 @@ export default function PatientsList(): JSX.Element {
   // Function to navigate to patient page
   const navigateToPatient = (patientId: string) => {
     closeSearch()
-    navigate(`/patients/${patientId}`)
+    navigate({ to: `/patients/${patientId}`, replace: true }).catch(() => { })
   }
 
   // Function to close search overlay and reset state
@@ -154,12 +154,12 @@ export default function PatientsList(): JSX.Element {
             Search
             <span class="ml-2 text-xs text-gray-400">Ctrl+K</span>
           </button>
-          <A
-            href="/register-patient"
+          <Link
+            to="/register-patient"
             class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
           >
             Register New Patient
-          </A>
+          </Link>
         </div>
       </div>
 
@@ -180,7 +180,7 @@ export default function PatientsList(): JSX.Element {
               <For each={patientsData()}>
                 {(patient) => (
                   <li>
-                    <A href={`/patients/${patient.id}`} class="block hover:bg-gray-50">
+                    <Link to={`/patients/${patient.id}`} class="block hover:bg-gray-50">
                       <div class="px-6 py-4 flex items-center">
                         {/* Patient list item content... */}
                         <div class="min-w-0 flex-1 flex items-center">
@@ -215,7 +215,7 @@ export default function PatientsList(): JSX.Element {
                         </div>
                         {/* Chevron Icon */}
                       </div>
-                    </A>
+                    </Link>
                   </li>
                 )}
               </For>

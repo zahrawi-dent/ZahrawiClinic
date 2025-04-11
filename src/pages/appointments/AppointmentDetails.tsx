@@ -1,4 +1,4 @@
-import { For, Show } from "solid-js";
+import { For, onCleanup, onMount, Show } from "solid-js";
 import { getPatientInitials } from "src/utils/appointmetUtils";
 import { Appointment, AppointmentStatus, getAppointmentStatusColor } from "src/types/appointments";
 import { formatDate, formatTime } from "src/utils/appointmetUtils";
@@ -12,12 +12,29 @@ export default function AppointmentDetails(props: {
 
 }) {
 
+  onMount(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        actions.setShowDetailsModal(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    onCleanup(() => {
+      window.removeEventListener('keydown', handleKeyDown);
+    });
+  });
 
   const appt = props.appointment
 
   return (
-
-    <div class="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
+    <div
+      class="fixed inset-0 backdrop-blur-md transition-opacity z-40 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      onClick={props.closeModal}
+    >
       <div class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-auto">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white">
           <h3 class="text-lg font-medium text-gray-900">Appointment Details</h3>
