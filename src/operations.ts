@@ -71,7 +71,7 @@ export class DentalOperations {
           page,
           perPage,
           {
-            sort: 'lastName,firstName' // Sort by last then first name
+            sort: 'firstName,lastName' // Sort by last then first name
           }
         )
         return result.items

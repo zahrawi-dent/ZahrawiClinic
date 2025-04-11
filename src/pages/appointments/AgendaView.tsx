@@ -1,12 +1,13 @@
 import { For } from "solid-js";
 import { Appointment, getAppointmentStatusColor } from "src/types/appointments";
 import { formatDisplayDate, formatEndTime, formatTime } from "src/utils/appointmetUtils";
+import { actions, selectors } from "./appointmentStore";
 
-export default function AgendaView(props: { handleViewDetails: (appointment: Appointment) => void, appointmentsByDate: () => Record<string, Appointment[]> }) {
+export default function AgendaView() {
   return (
 
     <div class="space-y-6">
-      <For each={Object.entries(props.appointmentsByDate())}>
+      <For each={Object.entries(selectors.appointmentsByDate())}>
         {([dateStr, appointments]) => (
           <div class="bg-white shadow-md rounded-lg overflow-hidden">
             <div class="bg-gray-50 px-6 py-3 border-b border-gray-200">
@@ -15,7 +16,7 @@ export default function AgendaView(props: { handleViewDetails: (appointment: App
               </h3>
             </div>
             <ul class="divide-y divide-gray-200">
-              <For each={appointments}>
+              <For each={appointments as Appointment[]}>
                 {(appointment) => (
                   <li class="px-6 py-4 hover:bg-gray-50 transition-colors">
                     <div class="flex items-center justify-between">
@@ -38,7 +39,7 @@ export default function AgendaView(props: { handleViewDetails: (appointment: App
                       </div>
                       <div class="flex space-x-2">
                         <button
-                          onClick={() => props.handleViewDetails(appointment)}
+                          onClick={() => actions.selectAppointment(appointment)}
                           class="text-sm bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-1 rounded"
                         >
                           Details

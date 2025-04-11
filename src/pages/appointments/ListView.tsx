@@ -1,10 +1,10 @@
 import { For } from "solid-js";
-import { getPatientInitials } from "src/routes/appointments";
-import { Appointment } from "src/types/appointments";
+import { getPatientInitials } from "src/utils/appointmetUtils";
 import { getAppointmentStatusColor, getAppointmentTypeColor } from "src/types/appointments";
 import { formatDate, formatTime } from "src/utils/appointmetUtils";
+import { actions, selectors } from "./appointmentStore";
 
-export default function ListView(props: { filteredAppointments: () => Appointment[], handleViewDetails: (appointment: Appointment) => void }) {
+export default function ListView() {
 
   return <div class="bg-white shadow-md rounded-lg overflow-hidden">
     <div class="overflow-x-auto">
@@ -32,7 +32,7 @@ export default function ListView(props: { filteredAppointments: () => Appointmen
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <For each={props.filteredAppointments()}>
+          <For each={selectors.filteredAppointments()}>
             {(appointment) => (
               <tr class="hover:bg-gray-50 transition-colors">
                 <td class="px-6 py-4 whitespace-nowrap">
@@ -87,7 +87,7 @@ export default function ListView(props: { filteredAppointments: () => Appointmen
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
-                    onClick={() => props.handleViewDetails(appointment)}
+                    onClick={() => actions.selectAppointment(appointment)}
                     class="text-indigo-600 hover:text-indigo-900 mr-3"
                   >
                     Details

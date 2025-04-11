@@ -13,6 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as AppointmentsImport } from './routes/appointments'
 import { Route as AboutImport } from './routes/about'
+import { Route as PatientsImport } from './routes/Patients'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
@@ -26,6 +27,12 @@ const AppointmentsRoute = AppointmentsImport.update({
 const AboutRoute = AboutImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const PatientsRoute = PatientsImport.update({
+  id: '/Patients',
+  path: '/Patients',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -44,6 +51,13 @@ declare module '@tanstack/solid-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/Patients': {
+      id: '/Patients'
+      path: '/Patients'
+      fullPath: '/Patients'
+      preLoaderRoute: typeof PatientsImport
       parentRoute: typeof rootRoute
     }
     '/about': {
@@ -67,12 +81,14 @@ declare module '@tanstack/solid-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/Patients': typeof PatientsRoute
   '/about': typeof AboutRoute
   '/appointments': typeof AppointmentsRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/Patients': typeof PatientsRoute
   '/about': typeof AboutRoute
   '/appointments': typeof AppointmentsRoute
 }
@@ -80,27 +96,30 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/Patients': typeof PatientsRoute
   '/about': typeof AboutRoute
   '/appointments': typeof AppointmentsRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/appointments'
+  fullPaths: '/' | '/Patients' | '/about' | '/appointments'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/appointments'
-  id: '__root__' | '/' | '/about' | '/appointments'
+  to: '/' | '/Patients' | '/about' | '/appointments'
+  id: '__root__' | '/' | '/Patients' | '/about' | '/appointments'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PatientsRoute: typeof PatientsRoute
   AboutRoute: typeof AboutRoute
   AppointmentsRoute: typeof AppointmentsRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PatientsRoute: PatientsRoute,
   AboutRoute: AboutRoute,
   AppointmentsRoute: AppointmentsRoute,
 }
@@ -116,12 +135,16 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/Patients",
         "/about",
         "/appointments"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/Patients": {
+      "filePath": "Patients.tsx"
     },
     "/about": {
       "filePath": "about.tsx"

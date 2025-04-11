@@ -83,3 +83,16 @@ export function generateCalendarDays(): Day[] {
 
   return days;
 }
+
+export function getPatientInitials(name: string): string {
+  try {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  } catch (e) {
+    return 'UN';
+  }
+}

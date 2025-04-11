@@ -1,8 +1,9 @@
 import { For } from "solid-js";
 import { Appointment, getAppointmentStatusColor } from "src/types/appointments";
 import { formatTime, generateCalendarDays } from "src/utils/appointmetUtils";
+import { actions, selectors } from "./appointmentStore";
 
-export default function CalendarView(props: { handleViewDetails: (appointment: Appointment) => void, getAppointmentsForDay: (date: string) => Appointment[] }) {
+export default function CalendarView() {
   return (
 
     <div class="bg-white shadow-md rounded-lg p-4">
@@ -27,11 +28,11 @@ export default function CalendarView(props: { handleViewDetails: (appointment: A
                 {day.day}
               </div>
               <div class="space-y-1">
-                <For each={props.getAppointmentsForDay(day.fullDate)}>
+                <For each={selectors.getAppointmentsForDay(day.fullDate)}>
                   {(appt: Appointment) => (
                     <div
                       class={`text-xs p-1 rounded truncate cursor-pointer ${getAppointmentStatusColor(appt.status).bg || 'bg-gray-100'} ${getAppointmentStatusColor(appt.status).text || 'text-gray-800'}`}
-                      onClick={() => props.handleViewDetails(appt)}
+                      onClick={() => actions.selectAppointment(appt)}
                     >
                       {formatTime(appt.date)} - {appt.expand?.patient.firstName + appt.expand?.patient.lastName}
                     </div>
