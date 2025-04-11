@@ -2,7 +2,8 @@ name: Update Rust Packages
 on: 
   push:
     branches:
-      - 'renovate/**'
+      # - 'renovate/**'
+      - main
     paths:
       - 'src-tauri/Cargo.toml'
       - 'src-tauri/tauri.conf.json'

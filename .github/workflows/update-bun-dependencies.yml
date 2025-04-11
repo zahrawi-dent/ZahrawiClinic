@@ -2,7 +2,8 @@ name: Update Bun Dependencies
 on: 
   push:
     branches:
-      - 'renovate/**'
+      # - 'renovate/**'
+      - main
     paths:
       - 'package.json'
 
