@@ -187,9 +187,6 @@ export default function LoginPage({ onConnect }: { onConnect: () => void }) {
                 </button>
               </div>
             </form>
-            <textarea value={loggin()} >
-
-            </textarea>
 
             <div class="mt-4 text-sm text-gray-600">
               <p class="text-center">Don't have a PocketBase instance?</p>

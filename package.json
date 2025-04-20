@@ -8,6 +8,7 @@
     "build": "vite build",
     "dev:tauri": "tauri dev",
     "build:tauri": "tauri build",
+    "build:android": "pnpm tauri android build --apk --target aarch64",
     "preview": "vite preview",
     "prettier": "prettier src -c",
     "prettier:fix": "prettier src -w",
