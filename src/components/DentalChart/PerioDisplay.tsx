@@ -1,6 +1,6 @@
 // src/components/DentalChart/PerioDisplay.tsx
 import { Component, createMemo, Index, Show, JSX } from 'solid-js';
-import type { PeriodontalMeasurements } from '../types/dental.types';
+import type { PeriodontalMeasurements } from './types/dental.types';
 
 interface PerioDisplayProps {
   perio: PeriodontalMeasurements | undefined;

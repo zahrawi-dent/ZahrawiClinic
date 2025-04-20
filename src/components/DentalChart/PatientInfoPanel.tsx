@@ -1,6 +1,6 @@
 // src/components/DentalChart/PatientInfoPanel.tsx
 import { Component, Accessor } from 'solid-js';
-import type { PatientInfo } from '../types/dental.types';
+import type { PatientInfo } from './types/dental.types';
 
 interface PatientInfoPanelProps {
   patientInfo: Accessor<PatientInfo>;

@@ -1,6 +1,6 @@
 // src/components/DentalChart/PerioInputPanel.tsx
 import { Component, createSignal, createEffect, Index, JSX, Accessor, For } from 'solid-js';
-import type { Tooth, PeriodontalMeasurements } from '../types/dental.types'; // Adjusted path if needed
+import type { Tooth, PeriodontalMeasurements } from './types/dental.types'; // Adjusted path if needed
 
 interface PerioInputPanelProps {
   selectedTooth: Accessor<Tooth | null | undefined>;

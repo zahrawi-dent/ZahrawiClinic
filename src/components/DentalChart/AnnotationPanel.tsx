@@ -1,7 +1,7 @@
 // src/components/DentalChart/AnnotationPanel.tsx
 import { Component, For, Show, Index, Accessor, Setter, createMemo, createSignal } from 'solid-js'; // Added createMemo
 import type { Tooth, Condition, SurfaceName, ConditionId, SurfaceCondition, TreatmentStatus, ConditionDetails, ToothPresence, ChartViewFilter } from '../types/dental.types';
-import { conditionsList, getConditionById } from '../constants/conditions';
+import { conditionsList, getConditionById } from './constants/conditions';
 
 
 interface AnnotationPanelProps {

@@ -4,9 +4,9 @@ import { createStore, reconcile, produce } from 'solid-js/store';
 import type {
   Tooth, PatientInfo, HistoryEntry, SurfaceName, ConditionId, SurfaceCondition, Condition,
   TreatmentStatus, ChartViewFilter, DentitionMode, PeriodontalMeasurements, ConditionDetails, ToothPresence
-} from '../types/dental.types'; // Adjusted path assuming types are up one level
-import { initialCombinedTeethData } from '../constants/initialData'; // Adjusted path
-import { conditionsList, getConditionById, getPermanentSuccessorId, getDeciduousPredecessorId } from '../constants/conditions'; // Adjusted path
+} from './types/dental.types'; // Adjusted path assuming types are up one level
+import { initialCombinedTeethData } from './constants/initialData'; // Adjusted path
+import { conditionsList, getConditionById, getPermanentSuccessorId, getDeciduousPredecessorId } from './constants/conditions'; // Adjusted path
 
 // Import Child Components
 import { ToothDisplay } from './ToothDisplay';

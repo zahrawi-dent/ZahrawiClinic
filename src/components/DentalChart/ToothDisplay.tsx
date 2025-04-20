@@ -1,7 +1,7 @@
 // src/components/DentalChart/ToothDisplay.tsx
 import { Component, createMemo, For, Index, Show, JSX } from 'solid-js';
-import type { Tooth, Surface, Condition, ConditionId, SurfaceName, TreatmentStatus, SurfaceCondition, PeriodontalMeasurements, ChartViewFilter, ToothPresence } from '../types/dental.types';
-import { conditionsList, getConditionById } from '../constants/conditions';
+import type { Tooth, Surface, Condition, ConditionId, SurfaceName, TreatmentStatus, SurfaceCondition, PeriodontalMeasurements, ChartViewFilter, ToothPresence } from './types/dental.types';
+import { conditionsList, getConditionById } from './constants/conditions';
 import { PerioDisplay } from './PerioDisplay'; // Import the separate component
 
 interface ToothDisplayProps {

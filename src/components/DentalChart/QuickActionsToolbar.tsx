@@ -1,7 +1,7 @@
 // src/components/DentalChart/QuickActionsToolbar.tsx
 import { Component, For, Accessor, Setter, Show } from 'solid-js';
-import type { Condition, ConditionId } from '../types/dental.types';
-import { getConditionById } from '../constants/conditions';
+import type { Condition, ConditionId } from './types/dental.types';
+import { getConditionById } from './constants/conditions';
 
 interface QuickActionsToolbarProps {
   // Pass specific condition IDs you want buttons for

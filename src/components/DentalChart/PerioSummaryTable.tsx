@@ -1,6 +1,6 @@
 // src/components/DentalChart/PerioSummaryTable.tsx
 import { Component, For, Index, Show, Accessor, JSX, createMemo } from 'solid-js';
-import type { Tooth, PeriodontalMeasurements } from '../types/dental.types';
+import type { Tooth, PeriodontalMeasurements } from './types/dental.types';
 import { getCal } from './FullPerioChart';
 
 interface PerioSummaryTableProps {

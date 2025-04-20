@@ -1,6 +1,6 @@
 // src/components/DentalChart/HistoryLog.tsx
 import { Component, For, Show, Accessor } from 'solid-js';
-import type { HistoryEntry } from '../types/dental.types';
+import type { HistoryEntry } from './types/dental.types';
 
 interface HistoryLogProps {
   historyLog: Accessor<readonly HistoryEntry[]>; // Use readonly array

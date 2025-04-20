@@ -1,6 +1,6 @@
 // src/components/DentalChart/FullPerioChart.tsx
 import { Component, For, Show, Index, Accessor, JSX } from 'solid-js';
-import type { Tooth, PeriodontalMeasurements } from '../types/dental.types';
+import type { Tooth, PeriodontalMeasurements } from './types/dental.types';
 
 interface FullPerioChartProps {
   upperTeeth: Accessor<Readonly<Tooth[]>>;
