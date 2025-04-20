@@ -6,6 +6,7 @@ import { initialCombinedTeethData } from '../../components/DentalChart/constants
 import type { SavedChartState, PatientInfo, HistoryEntry, Tooth } from '../../components/DentalChart/types/dental.types'
 import { dentalOps } from 'src/operations'
 import { useQuery } from '@tanstack/solid-query'
+import { Patient } from 'src/types/dental'
 
 // Define a default empty PatientInfo object conforming to the type
 const defaultPatientInfo: PatientInfo = {
@@ -21,16 +22,16 @@ export const Route = createFileRoute('/patients/$id/dental-chart')({
 })
 
 function PatientDentalChartPage(): JSXElement {
-  const { id } = Route.useParams()() as { id: string }
+  const { id: patient_id } = Route.useParams()() as { id: string }
 
 
-  const patientDetails = useQuery(() => ({
-    queryKey: ['patient-details', id],
+  const patientDetailsQuery = useQuery(() => ({
+    queryKey: ['patient-details', patient_id],
     queryFn: async () => {
-      const patient = await dentalOps.patients.getById(id);
+      const patient = await dentalOps.patients.getById(patient_id);
       // Optional: Throw an error if patient not found to trigger isError state
       if (!patient) {
-        throw new Error(`Patient with ID ${id} not found.`);
+        throw new Error(`Patient with ID ${patient_id} not found.`);
       }
       return patient;
     },
@@ -38,29 +39,29 @@ function PatientDentalChartPage(): JSXElement {
   }));
 
 
-  const chartStateResource = useQuery(() => ({
-    queryKey: ['chart-data', id],
+  const chartStateQuery = useQuery(() => ({
+    queryKey: ['chart-data', patient_id],
     queryFn: async () => {
-      const chartState = await getDentalChartState(id);
+      const chartState = await getDentalChartState(patient_id);
       return chartState;
     },
     // staleTime: 1000 * 60 * 5 // Optional: Keep data fresh for 5 minutes
   }));
 
   // Loading state derived from resources
-  const isLoading = createMemo(() => patientDetails.isLoading || chartStateResource.isLoading)
-  const hasError = createMemo(() => patientDetails.isError || chartStateResource.error)
+  const isLoading = createMemo(() => patientDetailsQuery.isLoading || chartStateQuery.isLoading)
+  const hasError = createMemo(() => patientDetailsQuery.isError || chartStateQuery.isError)
 
   // Handler for saving the chart state
   const handleSaveChart = async (currentState: SavedChartState) => {
-    const currentPatientId = id
-    if (!currentPatientId) {
+    if (!patient_id) {
       console.error("Cannot save chart, patient ID is missing.")
       alert("Error: Patient ID not found.")
       return
     }
     try {
-      await saveDentalChartState(currentPatientId, currentState)
+      // currentState: is the chart data to be saved
+      await saveDentalChartState(patient_id, currentState)
     } catch (error) {
       console.error("Failed to save chart state from page:", error)
       // Consider showing a user-facing error notification here
@@ -69,17 +70,17 @@ function PatientDentalChartPage(): JSXElement {
 
   // Memoize the props for DentalChart
   const chartProps = createMemo(() => {
-    const savedState = chartStateResource.data
-    const currentPatientDetails = patientDetails.data
-    const currentId = id
+    const savedState = chartStateQuery.data
+    const currentPatientDetails = patientDetailsQuery.data
+    const currentId = patient_id
 
     // Return null immediately if ID is missing
     if (!currentId) return null
 
     // Determine the base patient info
-    const basePatientInfo = currentPatientDetails || { ...defaultPatientInfo, id: currentId }
+    const basePatientInfo = currentPatientDetails
 
-    let combinedPatientInfo: PatientInfo
+    let combinedPatientInfo: Patient
     let teethData: Tooth[] = initialCombinedTeethData
     let historyData: HistoryEntry[] = []
 
@@ -90,6 +91,7 @@ function PatientDentalChartPage(): JSXElement {
         ...(savedState.patientInfo || {}),
         ...basePatientInfo
       }
+
       teethData = savedState.teeth || initialCombinedTeethData
       historyData = savedState.history || []
     } else {
@@ -97,13 +99,7 @@ function PatientDentalChartPage(): JSXElement {
     }
 
     // Final check to ensure all required fields are present
-    const finalPatientInfo: PatientInfo = {
-      id: combinedPatientInfo.id || currentId || '',
-      name: combinedPatientInfo.name || 'Unknown Patient',
-      dob: combinedPatientInfo.dob || '',
-      lastVisit: combinedPatientInfo.lastVisit || '',
-      nextAppointment: combinedPatientInfo.nextAppointment || '',
-    }
+    const finalPatientInfo: Patient = basePatientInfo
 
     return {
       patientId: currentId,

@@ -1,5 +1,7 @@
 // src/types/dental.types.ts
 
+import { Patient } from "src/types/dental";
+
 // Status for conditions/treatments
 export type TreatmentStatus = 'existing' | 'planned' | 'completed' | 'referred';
 
@@ -134,7 +136,7 @@ export type ToothPresence = 'present' | 'missing' | 'unerupted';
 // Define the structure for saved state
 export interface SavedChartState {
   version: number;
-  patientInfo: PatientInfo;
+  patientInfo: Patient;
   teeth: Tooth[];
   history: HistoryEntry[];
   dentitionMode: DentitionMode;

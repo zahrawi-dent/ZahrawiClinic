@@ -17,6 +17,7 @@ import { HistoryLog } from './HistoryLog';
 import { QuickActionsToolbar } from './QuickActionsToolbar';
 import { PerioInputPanel } from './PerioInputPanal'; // Adjusted filename if needed
 import { PerioSummaryTable } from './PerioSummaryTable';
+import { Patient } from 'src/types/dental';
 
 // Constants
 // REMOVED: const LOCAL_STORAGE_KEY = 'solidDentalChartState_v2';
@@ -28,7 +29,7 @@ interface DentalChartProps {
   ref?: (el: any) => void; // For exposing methods to parent components
   patientId: string; // Add patientId prop
   initialTeeth: Tooth[]; // Removed Readonly<>
-  initialPatientInfo: PatientInfo; // Patient info passed from parent
+  initialPatientInfo: Patient; // Patient info passed from parent
   initialHistory?: HistoryEntry[]; // Removed Readonly<>
   onSaveChart: (chartState: SavedChartState) => Promise<void> | void; // Callback to save state
 }
@@ -37,7 +38,7 @@ export const DentalChart: Component<DentalChartProps> = (props) => {
   // --- State ---
   // Initialize from props, createStore clones, signal needs manual copy
   const [teethStore, setTeethStore] = createStore<Tooth[]>(props.initialTeeth || initialCombinedTeethData);
-  const [patientInfo, setPatientInfo] = createSignal<PatientInfo>(props.initialPatientInfo);
+  const [patientInfo, setPatientInfo] = createSignal<Patient>(props.initialPatientInfo);
   const [historyLog, setHistoryLog] = createSignal<HistoryEntry[]>([...(props.initialHistory || [])]); // Create copy
 
   // UI / Interaction State
@@ -232,7 +233,7 @@ export const DentalChart: Component<DentalChartProps> = (props) => {
         const stateToExport: SavedChartState = {
           version: STATE_VERSION,
           patientInfo: patientInfo(), // Current internal patient info
-          teeth: JSON.parse(JSON.stringify(teethStore)), // Use deep clone of current teethStore
+          teeth: JSON.parse(JSON.stringify(teethStore)) as Tooth[], // Use deep clone of current teethStore
           history: historyLog(), // Current internal history log
           // Include view state as before
           dentitionMode: dentitionMode(),
@@ -245,7 +246,7 @@ export const DentalChart: Component<DentalChartProps> = (props) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        const patientName = patientInfo().name.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'dental_chart';
+        const patientName = patientInfo.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'dental_chart';
         const dateStr = new Date().toISOString().slice(0, 10);
         a.download = `${patientName}_${dateStr}_v${STATE_VERSION}.json`;
         document.body.appendChild(a);
@@ -261,7 +262,7 @@ export const DentalChart: Component<DentalChartProps> = (props) => {
         // Log data for potential manual use with external tools
         console.log("Chart Data for Export:", {
           patientInfo: patientInfo(),
-          teeth: JSON.parse(JSON.stringify(teethStore)), // Log clean data
+          teeth: JSON.parse(JSON.stringify(teethStore)) as Tooth[], // Log clean data
           history: historyLog()
         });
       }
@@ -322,7 +323,7 @@ export const DentalChart: Component<DentalChartProps> = (props) => {
     const remainingHistory = history.slice(1);       // Update the undo stack
 
     try {
-      const previousState: Tooth[] = JSON.parse(previousStateStr);
+      const previousState: Tooth[] = JSON.parse(previousStateStr) as Tooth[];
       setRedoStack(prev => [currentState, ...prev]); // Push the current state onto redo stack
       setUndoStack(remainingHistory);                // Set the new undo stack
       setTeethStore(reconcile(previousState));       // Apply the previous state efficiently
@@ -349,7 +350,7 @@ export const DentalChart: Component<DentalChartProps> = (props) => {
     const remainingHistory = history.slice(1);       // Update the redo stack
 
     try {
-      const nextState: Tooth[] = JSON.parse(nextStateStr);
+      const nextState: Tooth[] = JSON.parse(nextStateStr) as Tooth[];
       setUndoStack(prev => [currentState, ...prev]); // Push the current state back onto undo stack
       setRedoStack(remainingHistory);                // Set the new redo stack
       setTeethStore(reconcile(nextState));           // Apply the next state efficiently
@@ -365,7 +366,7 @@ export const DentalChart: Component<DentalChartProps> = (props) => {
     const chartStateToSave: SavedChartState = {
       version: STATE_VERSION,
       patientInfo: patientInfo(), // Current internal patient info state
-      teeth: JSON.parse(JSON.stringify(teethStore)), // Deep clone of current teeth data
+      teeth: JSON.parse(JSON.stringify(teethStore)) as Tooth[], // Deep clone of current teeth data
       history: historyLog(), // Current internal history log
       // Also save relevant view/UI state if desired
       dentitionMode: dentitionMode(),
@@ -479,9 +480,9 @@ export const DentalChart: Component<DentalChartProps> = (props) => {
 
       {/* --- Main Content Area --- */}
       <Show when={showPatientInfo()}>
-         {/* Pass the signal accessor and setter */}
+        {/* Pass the signal accessor and setter */}
         <PatientInfoPanel patientInfo={patientInfo} onUpdatePatientInfo={handleUpdatePatientInfo} />
-       </Show>
+      </Show>
 
       {/* --- Main Tooth Chart Display --- */}
       {/*<div class="bg-white p-4 rounded-lg shadow-md border border-gray-200 overflow-hidden mb-6 ">*/}

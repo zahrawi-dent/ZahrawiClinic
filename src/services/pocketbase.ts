@@ -1,6 +1,7 @@
 // src/services/pocketbase.js
-import PocketBase from 'pocketbase';
+import PocketBase, { RecordModel } from 'pocketbase';
 import type { SavedChartState } from '../components/DentalChart/types/dental.types';
+import { ErrorPayload } from 'vite';
 
 // Singleton instance
 let pbInstance: PocketBase = null;
@@ -119,12 +120,19 @@ export async function saveDentalChartState(patientId: string, chartData: SavedCh
   };
 
   try {
+
     // Use the correct collection name from the schema
-    const existingRecord = await pb.collection('dental_charts').getFirstListItem(`patient="${patientId}"`)
-      .catch(error => {
+    // NOTE: this works fine ignore error
+    const existingRecord: RecordModel = await pb.collection('dental_charts').getFirstListItem(`patient="${patientId}"`)
+      .catch((error) => {
         if (error.status === 404) return null;
         throw error;
-      });
+      })
+
+    // .catch(error => {
+    //   if (error.status === 404) return null;
+    //   throw error;
+    // });
 
     if (existingRecord) {
       // Update existing record
