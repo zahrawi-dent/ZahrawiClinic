@@ -130,3 +130,15 @@ export type ChartViewFilter = 'all' | 'existing' | 'planned' | 'completed';
 export type DentitionMode = 'permanent' | 'deciduous' | 'mixed';
 
 export type ToothPresence = 'present' | 'missing' | 'unerupted';
+
+// Define the structure for saved state
+export interface SavedChartState {
+  version: number;
+  patientInfo: PatientInfo;
+  teeth: Tooth[];
+  history: HistoryEntry[];
+  dentitionMode: DentitionMode;
+  viewFilter: ChartViewFilter;
+  showPerioVisuals?: boolean; // Save view state
+  showPerioSummary?: boolean; // Save view state
+}

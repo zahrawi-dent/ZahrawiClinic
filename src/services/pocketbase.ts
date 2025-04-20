@@ -1,5 +1,6 @@
 // src/services/pocketbase.js
 import PocketBase from 'pocketbase';
+import type { SavedChartState } from '../components/DentalChart/types/dental.types';
 
 // Singleton instance
 let pbInstance: PocketBase = null;
@@ -66,6 +67,78 @@ export function restoreConnection() {
     }
   }
   return false;
+}
+
+// --- Dental Chart State Persistence ---
+
+/**
+ * Fetches the latest dental chart state for a given patient.
+ * @param patientId The ID of the patient.
+ * @returns The SavedChartState object or null if not found.
+ */
+export async function getDentalChartState(patientId: string): Promise<SavedChartState | null> {
+  if (!patientId) {
+    console.error("getDentalChartState: patientId is required.");
+    return null;
+  }
+  const pb = getPocketBase();
+  try {
+    const record = await pb.collection('dental_charts').getFirstListItem(`patient="${patientId}"`, {
+      // sort: '-last_saved', // Optionally sort if needed, though filter should suffice
+    });
+    // Field name chart_data is correct
+    return record.chart_data as SavedChartState;
+  } catch (error: any) {
+    if (error.status === 404) {
+      console.log(`No existing dental chart state found for patient ${patientId}.`);
+      return null;
+    } else {
+      console.error(`Error fetching dental chart state for patient ${patientId}:`, error);
+      throw error;
+    }
+  }
+}
+
+/**
+ * Saves the dental chart state for a given patient.
+ * Creates a new record if one doesn't exist, otherwise updates the existing one.
+ * @param patientId The ID of the patient.
+ * @param chartData The SavedChartState object to save.
+ */
+export async function saveDentalChartState(patientId: string, chartData: SavedChartState): Promise<void> {
+  if (!patientId || !chartData) {
+    console.error("saveDentalChartState: patientId and chartData are required.");
+    return;
+  }
+
+  const pb = getPocketBase();
+  const dataToSave = {
+    patient: patientId,        // Field name is correct
+    chart_data: chartData,   // Field name is correct
+    last_saved: new Date().toISOString(), // Field name is correct
+  };
+
+  try {
+    // Use the correct collection name from the schema
+    const existingRecord = await pb.collection('dental_charts').getFirstListItem(`patient="${patientId}"`)
+      .catch(error => {
+        if (error.status === 404) return null;
+        throw error;
+      });
+
+    if (existingRecord) {
+      // Update existing record
+      await pb.collection('dental_charts').update(existingRecord.id, dataToSave);
+      console.log(`Updated dental chart state for patient ${patientId}`);
+    } else {
+      // Create new record
+      await pb.collection('dental_charts').create(dataToSave);
+      console.log(`Created new dental chart state for patient ${patientId}`);
+    }
+  } catch (error) {
+    console.error(`Error saving dental chart state for patient ${patientId}:`, error);
+    throw error;
+  }
 }
 
 // import PocketBase from 'pocketbase';

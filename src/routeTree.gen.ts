@@ -18,6 +18,7 @@ import { Route as AppointmentsIndexImport } from './routes/appointments/index'
 import { Route as PatientsPatientIdImport } from './routes/patients/$patientId'
 import { Route as AppointmentsNewImport } from './routes/appointments/new'
 import { Route as PatientsIdEditImport } from './routes/patients/$id.edit'
+import { Route as PatientsIdDentalChartImport } from './routes/patients/$id.dental-chart'
 
 // Create/Update Routes
 
@@ -60,6 +61,12 @@ const AppointmentsNewRoute = AppointmentsNewImport.update({
 const PatientsIdEditRoute = PatientsIdEditImport.update({
   id: '/patients/$id/edit',
   path: '/patients/$id/edit',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const PatientsIdDentalChartRoute = PatientsIdDentalChartImport.update({
+  id: '/patients/$id/dental-chart',
+  path: '/patients/$id/dental-chart',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -109,6 +116,13 @@ declare module '@tanstack/solid-router' {
       preLoaderRoute: typeof PatientsIndexImport
       parentRoute: typeof rootRoute
     }
+    '/patients/$id/dental-chart': {
+      id: '/patients/$id/dental-chart'
+      path: '/patients/$id/dental-chart'
+      fullPath: '/patients/$id/dental-chart'
+      preLoaderRoute: typeof PatientsIdDentalChartImport
+      parentRoute: typeof rootRoute
+    }
     '/patients/$id/edit': {
       id: '/patients/$id/edit'
       path: '/patients/$id/edit'
@@ -128,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/patients/$patientId': typeof PatientsPatientIdRoute
   '/appointments': typeof AppointmentsIndexRoute
   '/patients': typeof PatientsIndexRoute
+  '/patients/$id/dental-chart': typeof PatientsIdDentalChartRoute
   '/patients/$id/edit': typeof PatientsIdEditRoute
 }
 
@@ -138,6 +153,7 @@ export interface FileRoutesByTo {
   '/patients/$patientId': typeof PatientsPatientIdRoute
   '/appointments': typeof AppointmentsIndexRoute
   '/patients': typeof PatientsIndexRoute
+  '/patients/$id/dental-chart': typeof PatientsIdDentalChartRoute
   '/patients/$id/edit': typeof PatientsIdEditRoute
 }
 
@@ -149,6 +165,7 @@ export interface FileRoutesById {
   '/patients/$patientId': typeof PatientsPatientIdRoute
   '/appointments/': typeof AppointmentsIndexRoute
   '/patients/': typeof PatientsIndexRoute
+  '/patients/$id/dental-chart': typeof PatientsIdDentalChartRoute
   '/patients/$id/edit': typeof PatientsIdEditRoute
 }
 
@@ -161,6 +178,7 @@ export interface FileRouteTypes {
     | '/patients/$patientId'
     | '/appointments'
     | '/patients'
+    | '/patients/$id/dental-chart'
     | '/patients/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -170,6 +188,7 @@ export interface FileRouteTypes {
     | '/patients/$patientId'
     | '/appointments'
     | '/patients'
+    | '/patients/$id/dental-chart'
     | '/patients/$id/edit'
   id:
     | '__root__'
@@ -179,6 +198,7 @@ export interface FileRouteTypes {
     | '/patients/$patientId'
     | '/appointments/'
     | '/patients/'
+    | '/patients/$id/dental-chart'
     | '/patients/$id/edit'
   fileRoutesById: FileRoutesById
 }
@@ -190,6 +210,7 @@ export interface RootRouteChildren {
   PatientsPatientIdRoute: typeof PatientsPatientIdRoute
   AppointmentsIndexRoute: typeof AppointmentsIndexRoute
   PatientsIndexRoute: typeof PatientsIndexRoute
+  PatientsIdDentalChartRoute: typeof PatientsIdDentalChartRoute
   PatientsIdEditRoute: typeof PatientsIdEditRoute
 }
 
@@ -200,6 +221,7 @@ const rootRouteChildren: RootRouteChildren = {
   PatientsPatientIdRoute: PatientsPatientIdRoute,
   AppointmentsIndexRoute: AppointmentsIndexRoute,
   PatientsIndexRoute: PatientsIndexRoute,
+  PatientsIdDentalChartRoute: PatientsIdDentalChartRoute,
   PatientsIdEditRoute: PatientsIdEditRoute,
 }
 
@@ -219,6 +241,7 @@ export const routeTree = rootRoute
         "/patients/$patientId",
         "/appointments/",
         "/patients/",
+        "/patients/$id/dental-chart",
         "/patients/$id/edit"
       ]
     },
@@ -239,6 +262,9 @@ export const routeTree = rootRoute
     },
     "/patients/": {
       "filePath": "patients/index.tsx"
+    },
+    "/patients/$id/dental-chart": {
+      "filePath": "patients/$id.dental-chart.tsx"
     },
     "/patients/$id/edit": {
       "filePath": "patients/$id.edit.tsx"

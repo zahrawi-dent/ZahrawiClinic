@@ -60,6 +60,14 @@ function handleError(error: unknown, context: string): never {
   throw new Error(`${context}: ${message}`)
 }
 
+// Custom Types for dental charts
+export interface DentalChart extends RecordModel {
+  patient: string; // Reference to patient ID
+  chartData: string; // Stringified JSON object containing dental chart state
+}
+
+export type DentalChartData = Omit<DentalChart, keyof RecordModel | 'expand'>
+
 export class DentalOperations {
   // Helper to get typed collection access
   private collection<T extends RecordModel>(name: string) {
@@ -624,6 +632,47 @@ export class DentalOperations {
       }
     }
     // Add create, update, delete, getById as necessary
+  }
+
+  // ===== DENTAL CHART OPERATIONS =====
+  dentalCharts = {
+    create: async (chartData: DentalChartData): Promise<DentalChart> => {
+      try {
+        return await this.collection<DentalChart>('dental_charts').create(chartData);
+      } catch (error) {
+        handleError(error, 'Error creating dental chart')
+      }
+    },
+    
+    getByPatientId: async (patientId: string): Promise<DentalChart | null> => {
+      try {
+        const result = await this.collection<DentalChart>('dental_charts').getList(1, 1, {
+          filter: pb.filter('patient = {:patientId}', { patientId })
+        });
+        
+        // Return the first chart found, or null if none exists
+        return result.items.length > 0 ? result.items[0] : null;
+      } catch (error) {
+        handleError(error, `Error fetching dental chart for patient with ID ${patientId}`)
+      }
+    },
+    
+    update: async (chartId: string, chartData: Partial<DentalChartData>): Promise<DentalChart> => {
+      try {
+        return await this.collection<DentalChart>('dental_charts').update(chartId, chartData);
+      } catch (error) {
+        handleError(error, `Error updating dental chart with ID ${chartId}`)
+      }
+    },
+    
+    delete: async (chartId: string): Promise<boolean> => {
+      try {
+        await this.collection<DentalChart>('dental_charts').delete(chartId);
+        return true;
+      } catch (error) {
+        handleError(error, `Error deleting dental chart with ID ${chartId}`)
+      }
+    }
   }
 
   // --- Helper Mappers for Consistent Expanded Types ---
