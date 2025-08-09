@@ -1,0 +1,13 @@
+# Dependencies
+node_modules
+
+# PocketBase
+apps/backend/pb_data/
+apps/backend/ZahrawiClinic  # Ignore the binary itself
+
+# SolidJS build output
+apps/frontend/dist
+apps/frontend/.solid
+
+# Turbo
+.turbo
