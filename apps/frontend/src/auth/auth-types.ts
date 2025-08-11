@@ -23,7 +23,7 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  role: 'user' | 'admin' | null;
+  role: 'receptionist' | 'dentist' | 'administrator' | 'manager' | 'admin' | 'user' | null;
 }
 
 export interface AuthContextValue {
