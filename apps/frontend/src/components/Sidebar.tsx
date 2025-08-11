@@ -93,6 +93,30 @@ const SettingsIcon = () => (
   </svg>
 );
 
+const UserIcon = () => (
+  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+  </svg>
+);
+
+const BellIcon = () => (
+  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-5 5v-5zM4.83 2.83A4 4 0 016.34 2h11.32a4 4 0 013.51 2.83L22 8H2l1.83-5.17z" />
+  </svg>
+);
+
+const HelpIcon = () => (
+  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+const ChevronDownIcon = () => (
+  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+  </svg>
+);
+
 // ===== COMPONENTS =====
 const Kbd = (props: { children: any; class?: string }) => (
   <kbd
@@ -101,6 +125,156 @@ const Kbd = (props: { children: any; class?: string }) => (
     {props.children}
   </kbd>
 );
+
+const UserProfileDropdown = (props: { 
+  userProfile: { name: string; email: string; avatar?: string; role: string }; 
+  collapsed: boolean 
+}) => {
+  const [isOpen, setIsOpen] = createSignal(false);
+
+  const handleSignOut = () => {
+    // TODO: Implement sign out logic
+    console.log('Sign out clicked');
+    setIsOpen(false);
+  };
+
+  const handleSettings = () => {
+    // TODO: Navigate to settings
+    console.log('Settings clicked');
+    setIsOpen(false);
+  };
+
+  const handleProfile = () => {
+    // TODO: Navigate to profile
+    console.log('Profile clicked');
+    setIsOpen(false);
+  };
+
+  const handleNotifications = () => {
+    // TODO: Navigate to notifications
+    console.log('Notifications clicked');
+    setIsOpen(false);
+  };
+
+  const handleHelp = () => {
+    // TODO: Navigate to help
+    console.log('Help clicked');
+    setIsOpen(false);
+  };
+
+  return (
+    <div class="relative">
+      <Show when={!props.collapsed}>
+        <button
+          onClick={() => setIsOpen(!isOpen())}
+          class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800/30 transition-colors group"
+        >
+          <div class="relative">
+            <Show
+              when={props.userProfile.avatar}
+              fallback={
+                <div class="w-10 h-10 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-full flex items-center justify-center">
+                  <span class="text-sm font-semibold text-white">
+                    {props.userProfile.name.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              }
+            >
+              <img 
+                src={props.userProfile.avatar} 
+                alt={props.userProfile.name}
+                class="w-10 h-10 rounded-full object-cover"
+              />
+            </Show>
+            <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 border-2 border-slate-900 rounded-full"></div>
+          </div>
+          
+          <div class="flex-1 min-w-0 text-left">
+            <p class="font-medium text-white truncate">{props.userProfile.name}</p>
+            <p class="text-sm text-slate-400 truncate">{props.userProfile.role}</p>
+          </div>
+          
+          <div class={`transition-transform duration-200 ${isOpen() ? 'rotate-180' : ''}`}>
+            <ChevronDownIcon />
+          </div>
+        </button>
+
+        {/* Dropdown Menu */}
+        <Show when={isOpen()}>
+          <div class="absolute bottom-full left-0 right-0 mb-2 bg-slate-800/95 backdrop-blur-xl border border-slate-700/50 rounded-lg shadow-xl overflow-hidden">
+            <div class="p-2 space-y-1">
+              <button
+                onClick={handleProfile}
+                class="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-300 hover:bg-slate-700/50 hover:text-white rounded-md transition-colors"
+              >
+                <UserIcon />
+                <span>Profile</span>
+              </button>
+              
+              <button
+                onClick={handleSettings}
+                class="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-300 hover:bg-slate-700/50 hover:text-white rounded-md transition-colors"
+              >
+                <SettingsIcon />
+                <span>Settings</span>
+              </button>
+              
+              <button
+                onClick={handleNotifications}
+                class="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-300 hover:bg-slate-700/50 hover:text-white rounded-md transition-colors"
+              >
+                <BellIcon />
+                <span>Notifications</span>
+              </button>
+              
+              <button
+                onClick={handleHelp}
+                class="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-300 hover:bg-slate-700/50 hover:text-white rounded-md transition-colors"
+              >
+                <HelpIcon />
+                <span>Help & Support</span>
+              </button>
+              
+              <div class="border-t border-slate-700/50 my-1"></div>
+              
+              <button
+                onClick={handleSignOut}
+                class="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-md transition-colors"
+              >
+                <LogoutIcon />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </div>
+        </Show>
+      </Show>
+      
+      <Show when={props.collapsed}>
+        <div class="flex justify-center">
+          <div class="relative">
+            <Show
+              when={props.userProfile.avatar}
+              fallback={
+                <div class="w-10 h-10 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-full flex items-center justify-center">
+                  <span class="text-sm font-semibold text-white">
+                    {props.userProfile.name.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              }
+            >
+              <img 
+                src={props.userProfile.avatar} 
+                alt={props.userProfile.name}
+                class="w-10 h-10 rounded-full object-cover"
+              />
+            </Show>
+            <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 border-2 border-slate-900 rounded-full"></div>
+          </div>
+        </div>
+      </Show>
+    </div>
+  );
+};
 
 const Badge = (props: { children: any; variant?: 'default' | 'success' | 'warning' | 'error' }) => (
   <span
@@ -421,68 +595,11 @@ export function Sidebar(props: SidebarProps) {
 
           {/* User Profile Footer */}
           <Show when={props.userProfile}>
-            <div class={`border-t border-slate-800/50 ${isCollapsed() ? 'p-2' : 'p-4'}`}>
-              <Show when={!isCollapsed()}>
-                <div class="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800/30 transition-colors group">
-                  <div class="relative">
-                    <Show
-                      when={props.userProfile!.avatar}
-                      fallback={
-                        <div class="w-10 h-10 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-full flex items-center justify-center">
-                          <span class="text-sm font-semibold text-white">
-                            {props.userProfile!.name.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                      }
-                    >
-                      <img 
-                        src={props.userProfile!.avatar} 
-                        alt={props.userProfile!.name}
-                        class="w-10 h-10 rounded-full object-cover"
-                      />
-                    </Show>
-                    <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 border-2 border-slate-900 rounded-full"></div>
-                  </div>
-                  
-                  <div class="flex-1 min-w-0">
-                    <p class="font-medium text-white truncate">{props.userProfile!.name}</p>
-                    <p class="text-sm text-slate-400 truncate">{props.userProfile!.role}</p>
-                  </div>
-                  
-                  <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button class="p-1.5 hover:bg-slate-700/50 rounded-md transition-colors">
-                      <SettingsIcon />
-                    </button>
-                    <button class="p-1.5 hover:bg-slate-700/50 rounded-md transition-colors text-red-400">
-                      <LogoutIcon />
-                    </button>
-                  </div>
-                </div>
-              </Show>
-              
-              <Show when={isCollapsed()}>
-                <div class="flex justify-center">
-                  <div class="relative">
-                    <Show
-                      when={props.userProfile!.avatar}
-                      fallback={
-                        <div class="w-10 h-10 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-full flex items-center justify-center">
-                          <span class="text-sm font-semibold text-white">
-                            {props.userProfile!.name.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                      }
-                    >
-                      <img 
-                        src={props.userProfile!.avatar} 
-                        alt={props.userProfile!.name}
-                        class="w-10 h-10 rounded-full object-cover"
-                      />
-                    </Show>
-                    <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 border-2 border-slate-900 rounded-full"></div>
-                  </div>
-                </div>
-              </Show>
+            <div class={`shrink-0 border-t border-slate-800/50 ${isCollapsed() ? 'p-2' : 'p-4'}`}>
+              <UserProfileDropdown 
+                userProfile={props.userProfile!} 
+                collapsed={isCollapsed()} 
+              />
             </div>
           </Show>
         </aside>

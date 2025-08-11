@@ -1,12 +1,30 @@
-import { Show, type Component } from 'solid-js';
+import { Show, type Component, createMemo } from 'solid-js';
 import { Outlet } from '@tanstack/solid-router';
 import { Sidebar, defaultNavItems } from '../Sidebar';
+import { useAuth } from '../../auth/AuthContext';
 
 
 const AppSidebar: Component = () => {
+  const { authState } = useAuth();
+  
+  const userProfile = createMemo(() => {
+    const auth = authState();
+    if (!auth.user) return undefined;
+    
+    return {
+      name: auth.user.name || auth.user.email,
+      email: auth.user.email,
+      avatar: auth.user.avatar,
+      role: auth.role === 'admin' ? 'Administrator' : 'User'
+    };
+  });
+
   return (
     <div class="flex flex-col h-full">
-      <Sidebar items={defaultNavItems} />
+      <Sidebar 
+        items={defaultNavItems} 
+        userProfile={userProfile()}
+      />
     </div>
   );
 };
