@@ -1,7 +1,8 @@
 import type { Component } from 'solid-js';
-import { For, Show, createSignal } from 'solid-js';
+import { For, Show, createSignal, createMemo } from 'solid-js';
 import { Collections } from '../../types/pocketbase-types';
 import { useListQuery, useCreateMutation, useDeleteMutation } from '../../data';
+import AppointmentCalendar from '../../components/AppointmentCalendar';
 
 const AppointmentsPage: Component = () => {
   const collection = Collections.Appointments;
@@ -9,6 +10,28 @@ const AppointmentsPage: Component = () => {
   const createAppt = useCreateMutation(collection);
   const deleteAppt = useDeleteMutation(collection);
   const [formOpen, setFormOpen] = createSignal(false);
+
+  // Transform PocketBase appointments to calendar format
+  const calendarAppointments = createMemo(() => {
+    if (!apptsQuery.data?.items) return [];
+    
+    return apptsQuery.data.items.map(apt => ({
+      id: apt.id,
+      patientName: apt.patient?.[0] || 'Unknown Patient',
+      patientId: apt.patient?.[0] || '',
+      date: new Date(apt.start_time).toISOString().split('T')[0],
+      time: new Date(apt.start_time).toTimeString().slice(0, 5),
+      endTime: apt.end_time ? new Date(apt.end_time).toTimeString().slice(0, 5) : '',
+      type: apt.reason || 'Appointment',
+      status: apt.status as 'scheduled' | 'in-progress' | 'completed' | 'cancelled',
+      dentist: apt.doctor?.[0] || 'Unknown Doctor',
+      notes: apt.notes || '',
+      priority: 'medium' as const,
+      duration: apt.end_time ? 
+        Math.round((new Date(apt.end_time).getTime() - new Date(apt.start_time).getTime()) / (1000 * 60)) : 
+        60
+    }));
+  });
 
   const onCreate = async (e: SubmitEvent) => {
     e.preventDefault();
@@ -31,51 +54,21 @@ const AppointmentsPage: Component = () => {
   };
 
   return (
-    <div class="space-y-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <h2 class="text-xl font-semibold">Appointments</h2>
-          <p class="text-sm text-gray-600">Schedule and track appointments.</p>
-        </div>
-        <button onClick={() => setFormOpen(true)} class="rounded bg-indigo-600 px-3 py-2 text-white text-sm hover:bg-indigo-700">New appointment</button>
-      </div>
-
+    <div class="min-h-screen bg-gray-50 p-6">
       <Show when={apptsQuery.isLoading}>
-        <div>Loading appointments…</div>
+        <div class="flex items-center justify-center h-64">
+          <div class="text-lg text-gray-600">Loading appointments…</div>
+        </div>
       </Show>
+      
       <Show when={apptsQuery.isError}>
-        <div class="text-red-600">Failed to load appointments</div>
+        <div class="flex items-center justify-center h-64">
+          <div class="text-lg text-red-600">Failed to load appointments</div>
+        </div>
       </Show>
 
       <Show when={apptsQuery.data}>
-        <div class="overflow-x-auto rounded border bg-white">
-          <table class="min-w-full text-sm">
-            <thead class="bg-gray-50 text-gray-700">
-              <tr>
-                <th class="text-left px-3 py-2">Start</th>
-                <th class="text-left px-3 py-2">End</th>
-                <th class="text-left px-3 py-2">Status</th>
-                <th class="text-left px-3 py-2">Reason</th>
-                <th class="text-left px-3 py-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <For each={apptsQuery.data!.items} fallback={<tr><td class="px-3 py-2">No appointments</td></tr>}>
-                {(a) => (
-                  <tr class="border-t">
-                    <td class="px-3 py-2">{new Date(a.start_time).toLocaleString()}</td>
-                    <td class="px-3 py-2">{a.end_time ? new Date(a.end_time).toLocaleString() : '-'}</td>
-                    <td class="px-3 py-2 capitalize">{a.status}</td>
-                    <td class="px-3 py-2">{a.reason}</td>
-                    <td class="px-3 py-2">
-                      <button class="rounded border px-2 py-1 text-red-600 hover:bg-red-50" onClick={() => deleteAppt.mutate({ id: a.id })}>Delete</button>
-                    </td>
-                  </tr>
-                )}
-              </For>
-            </tbody>
-          </table>
-        </div>
+        <AppointmentCalendar appointments={calendarAppointments()} />
       </Show>
 
       <Show when={formOpen()}>
