@@ -397,7 +397,7 @@ const WeeklyView = (props: {
       <div class="grid grid-cols-7 gap-1 p-4">
         <For each={weekDays}>
           {(day, index) => {
-            const appointments = getAppointmentsForDate(day);
+            const appointments = createMemo(() => getAppointmentsForDate(day));
             const isToday = day.toDateString() === new Date().toDateString();
             
             return (
@@ -412,7 +412,7 @@ const WeeklyView = (props: {
                 </div>
                 
                 <div class="space-y-1">
-                  <For each={appointments.slice(0, 3)}>
+                  <For each={appointments().slice(0, 3)}>
                     {(appointment) => (
                       <AppointmentCard
                         appointment={appointment}
@@ -422,9 +422,9 @@ const WeeklyView = (props: {
                     )}
                   </For>
                   
-                  {appointments.length > 3 && (
+                  {appointments().length > 3 && (
                     <div class="text-xs text-gray-500 text-center">
-                      +{appointments.length - 3} more
+                      +{appointments().length - 3} more
                     </div>
                   )}
                 </div>
@@ -471,7 +471,7 @@ const MonthlyView = (props: {
           {/* Calendar days */}
           <For each={monthDays}>
             {(dayData) => {
-              const appointments = getAppointmentsForDate(dayData.date);
+              const appointments = createMemo(() => getAppointmentsForDate(dayData.date));
               const isToday = dayData.date.toDateString() === new Date().toDateString();
               
               return (
@@ -483,7 +483,7 @@ const MonthlyView = (props: {
                   </div>
                   
                   <div class="space-y-1">
-                    <For each={appointments.slice(0, 2)}>
+                    <For each={appointments().slice(0, 2)}>
                       {(appointment) => (
                         <div
                           onClick={() => props.onAppointmentClick(appointment)}
@@ -494,9 +494,9 @@ const MonthlyView = (props: {
                       )}
                     </For>
                     
-                    {appointments.length > 2 && (
+                    {appointments().length > 2 && (
                       <div class="text-xs text-gray-500 text-center">
-                        +{appointments.length - 2}
+                        +{appointments().length - 2}
                       </div>
                     )}
                   </div>
@@ -512,7 +512,7 @@ const MonthlyView = (props: {
 
 // ===== MAIN COMPONENT =====
 interface AppointmentCalendarProps {
-  appointments?: Appointment[];
+  appointments?: () => Appointment[];
   class?: string;
 }
 
@@ -523,7 +523,7 @@ const AppointmentCalendar: Component<AppointmentCalendarProps> = (props) => {
   const [currentDate, setCurrentDate] = createSignal(new Date());
   const [selectedAppointment, setSelectedAppointment] = createSignal<Appointment | null>(null);
 
-  const appointments = createMemo(() => props.appointments || mockAppointments);
+  const appointments = createMemo<Appointment[]>(() => (props.appointments ? props.appointments() : mockAppointments));
 
   const views: CalendarView[] = [
     { type: 'daily', label: 'Daily', icon: ClockIcon },

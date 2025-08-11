@@ -1,7 +1,9 @@
 import type { Component } from 'solid-js';
 import { For, Show, createSignal, createMemo } from 'solid-js';
 import { Collections } from '../../types/pocketbase-types';
+import type { AppointmentsResponse } from '../../types/pocketbase-types';
 import { useListQuery, useCreateMutation, useDeleteMutation } from '../../data';
+import { useRealtimeSubscription } from '../../optimistic/optimistic-hooks';
 import AppointmentCalendar from '../../components/AppointmentCalendar';
 
 const AppointmentsPage: Component = () => {
@@ -11,11 +13,13 @@ const AppointmentsPage: Component = () => {
   const deleteAppt = useDeleteMutation(collection);
   const [formOpen, setFormOpen] = createSignal(false);
 
+  // Live updates
+  useRealtimeSubscription(Collections.Appointments);
+
   // Transform PocketBase appointments to calendar format
   const calendarAppointments = createMemo(() => {
-    if (!apptsQuery.data?.items) return [];
-    
-    return apptsQuery.data.items.map(apt => ({
+    const items = (apptsQuery.data?.items ?? []) as AppointmentsResponse[];
+    return items.map((apt) => ({
       id: apt.id,
       patientName: apt.patient?.[0] || 'Unknown Patient',
       patientId: apt.patient?.[0] || '',
@@ -27,8 +31,8 @@ const AppointmentsPage: Component = () => {
       dentist: apt.doctor?.[0] || 'Unknown Doctor',
       notes: apt.notes || '',
       priority: 'medium' as const,
-      duration: apt.end_time ? 
-        Math.round((new Date(apt.end_time).getTime() - new Date(apt.start_time).getTime()) / (1000 * 60)) : 
+      duration: apt.end_time ?
+        Math.round((new Date(apt.end_time).getTime() - new Date(apt.start_time).getTime()) / (1000 * 60)) :
         60
     }));
   });
@@ -68,7 +72,7 @@ const AppointmentsPage: Component = () => {
       </Show>
 
       <Show when={apptsQuery.data}>
-        <AppointmentCalendar appointments={calendarAppointments()} />
+        <AppointmentCalendar appointments={calendarAppointments} />
       </Show>
 
       <Show when={formOpen()}>

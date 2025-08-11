@@ -109,24 +109,59 @@ export function useRealtimeSubscription(collection: Collections) {
           switch (e.action) {
             case 'create':
               console.log(`[Realtime] New record created in ${collection}`);
-              queryClient.invalidateQueries({
-                queryKey: queryKeys.collection(collection),
-                exact: false
-              });
+
+              // Seed detail cache for the new record
+              if (e.record?.id) {
+                queryClient.setQueryData(queryKeys.detail(collection, e.record.id), e.record);
+              }
+
+              // Prepend into existing list queries (best-effort)
+              queryClient.setQueriesData<ListResult<CollectionResponses[typeof collection]>>(
+                { queryKey: queryKeys.collection(collection), exact: false },
+                (old) => {
+                  if (!old || !(old as any).items || !e.record) return old;
+
+                  const exists = old.items.some((item) => item.id === e.record.id);
+                  if (exists) return old;
+
+                  const newItems = [e.record as CollectionResponses[typeof collection], ...old.items];
+
+                  // Keep the same page size length if present
+                  const perPage = (old as any).perPage || newItems.length;
+                  if (newItems.length > perPage) newItems.length = perPage;
+
+                  return {
+                    ...old,
+                    totalItems: old.totalItems + 1,
+                    items: newItems,
+                  };
+                }
+              );
+
               break;
 
             case 'update':
               console.log(`[Realtime] Record updated in ${collection}: ${e.record?.id}`);
-              // Invalidate both list and detail queries
-              queryClient.invalidateQueries({
-                queryKey: queryKeys.collection(collection),
-                exact: false
-              });
+
+              // Update detail cache first
               if (e.record?.id) {
-                queryClient.invalidateQueries({
-                  queryKey: queryKeys.detail(collection, e.record.id)
-                });
+                queryClient.setQueryData(queryKeys.detail(collection, e.record.id), e.record);
               }
+
+              // Update item in all list queries
+              queryClient.setQueriesData<ListResult<CollectionResponses[typeof collection]>>(
+                { queryKey: queryKeys.collection(collection), exact: false },
+                (old) => {
+                  if (!old || !(old as any).items || !e.record?.id) return old;
+                  const hasItem = old.items.some((item) => item.id === e.record.id);
+                  if (!hasItem) return old;
+                  return {
+                    ...old,
+                    items: old.items.map((item) => (item.id === e.record.id ? e.record : item)),
+                  };
+                }
+              );
+
               break;
 
             case 'delete':
@@ -135,7 +170,7 @@ export function useRealtimeSubscription(collection: Collections) {
               // Remove from cache immediately
               if (e.record?.id) {
                 queryClient.removeQueries({
-                  queryKey: queryKeys.detail(collection, e.record.id)
+                  queryKey: queryKeys.detail(collection, e.record.id),
                 });
               }
 
@@ -148,7 +183,7 @@ export function useRealtimeSubscription(collection: Collections) {
                   return {
                     ...old,
                     totalItems: Math.max(0, old.totalItems - 1),
-                    items: old.items.filter(item => item.id !== e.record.id)
+                    items: old.items.filter(item => item.id !== e.record.id),
                   };
                 }
               );
@@ -218,6 +253,54 @@ export function useRealtimeSubscription(collection: Collections) {
     isConnected,
     retryCount,
   };
+}
+
+// Record-level realtime subscription for a single record
+export function useRealtimeRecordSubscription(collection: Collections, id: string | undefined) {
+  const pb = usePocketBase();
+  const queryClient = useQueryClient();
+
+  createEffect(() => {
+    if (!id) return;
+    let unsubscribe: (() => void) | null = null;
+
+    const connect = async () => {
+      try {
+        const callback = (e: any) => {
+          switch (e.action) {
+            case 'update':
+            case 'create':
+              if (e.record?.id === id) {
+                // Update detail cache
+                queryClient.setQueryData(queryKeys.detail(collection, id), e.record);
+              }
+              break;
+            case 'delete':
+              if (e.record?.id === id) {
+                // Remove detail cache
+                queryClient.removeQueries({ queryKey: queryKeys.detail(collection, id) });
+              }
+              break;
+            default:
+              // No-op
+              break;
+          }
+        };
+
+        unsubscribe = await pb.collection(collection).subscribe(id, callback);
+      } catch (error) {
+        console.error(`[Realtime] Failed to subscribe to ${collection}:${id}`, error);
+      }
+    };
+
+    connect();
+
+    onCleanup(() => {
+      if (unsubscribe) {
+        try { unsubscribe(); } catch {}
+      }
+    });
+  });
 }
 
 // Utility to generate temporary IDs

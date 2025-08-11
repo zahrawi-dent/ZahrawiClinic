@@ -10,6 +10,7 @@ import {
 import { useNavigate, useParams } from '@tanstack/solid-router';
 import { Collections } from '../../types/pocketbase-types';
 import { useDetailQuery, useUpdateMutation, useDeleteMutation } from '../../data';
+import { useRealtimeRecordSubscription } from '../../optimistic/optimistic-hooks';
 
 // ===== ICONS =====
 const ArrowLeftIcon = () => (
@@ -265,6 +266,9 @@ const AppointmentDetailPage: Component = () => {
   const deleteAppointment = useDeleteMutation(Collections.Appointments);
 
   const appointment = createMemo(() => appointmentQuery.data);
+
+  // Live updates for this appointment
+  useRealtimeRecordSubscription(Collections.Appointments, appointmentId());
 
   const handleSave = async (data: any) => {
     try {

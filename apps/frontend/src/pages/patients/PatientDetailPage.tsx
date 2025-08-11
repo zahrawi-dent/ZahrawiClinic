@@ -2,6 +2,7 @@ import { type Component, createMemo, Show } from 'solid-js';
 import { useParams, useNavigate } from '@tanstack/solid-router';
 import { Collections } from '../../types/pocketbase-types';
 import { useDetailQuery, useDeleteMutation } from '../../data';
+import { useRealtimeRecordSubscription } from '../../optimistic/optimistic-hooks';
 
 const ArrowLeftIcon = () => (
   <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -18,6 +19,9 @@ const PatientDetailPage: Component = () => {
   const deletePatient = useDeleteMutation(Collections.Patients);
 
   const patient = createMemo(() => patientQuery.data);
+
+  // Live updates for this patient
+  useRealtimeRecordSubscription(Collections.Patients, patientId());
 
   return (
     <div class="min-h-screen bg-gray-50 p-6">
