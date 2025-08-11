@@ -11,6 +11,7 @@ import AdminLoginPage from './pages/auth/AdminLoginPage.tsx';
 import Dashboard from './pages/Dashboard.tsx';
 import PatientsListPage from './pages/patients/PatientsListPage.tsx';
 import AppointmentsPage from './pages/appointments/AppointmentsPage.tsx';
+import AppointmentDetailPage from './pages/appointments/AppointmentDetailPage.tsx';
 
 // Root shell with providers
 const ProvidersShell: Component = () => {
@@ -74,6 +75,12 @@ const appointmentsRoute = createRoute({
   component: AppointmentsPage,
 });
 
+const appointmentDetailRoute = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: '/appointments/$id',
+  component: AppointmentDetailPage,
+});
+
 const routeTree = rootRoute.addChildren([
   loginRoute,
   signupRoute,
@@ -82,6 +89,7 @@ const routeTree = rootRoute.addChildren([
     dashboardRoute,
     patientsRoute,
     appointmentsRoute,
+    appointmentDetailRoute,
   ]),
 ]);
 

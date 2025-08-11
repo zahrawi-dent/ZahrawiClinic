@@ -17,6 +17,7 @@ if (DATA_SOURCE === 'pocketbase') {
 
 export const {
   useListQuery,
+  useDetailQuery,
   useCreateMutation,
   useUpdateMutation,
   useDeleteMutation,
