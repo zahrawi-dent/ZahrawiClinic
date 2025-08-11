@@ -7,6 +7,7 @@ import {
   onMount,
   onCleanup 
 } from 'solid-js';
+import { createForm } from '@tanstack/solid-form';
 import { useNavigate, useParams } from '@tanstack/solid-router';
 import { Collections } from '../../types/pocketbase-types';
 import { useDetailQuery, useUpdateMutation, useDeleteMutation } from '../../data';
@@ -154,78 +155,109 @@ const EditForm = (props: {
   onCancel: () => void;
   isLoading: boolean;
 }) => {
-  const [formData, setFormData] = createSignal({
-    start_time: props.appointment.start_time ? new Date(props.appointment.start_time).toISOString().slice(0, 16) : '',
-    end_time: props.appointment.end_time ? new Date(props.appointment.end_time).toISOString().slice(0, 16) : '',
-    reason: props.appointment.reason || '',
-    notes: props.appointment.notes || '',
-    status: props.appointment.status || 'scheduled'
-  });
-
-  const handleSubmit = (e: Event) => {
-    e.preventDefault();
-    props.onSave(formData());
-  };
+  const form = createForm(() => ({
+    defaultValues: {
+      start_time: props.appointment.start_time ? new Date(props.appointment.start_time).toISOString().slice(0, 16) : '',
+      end_time: props.appointment.end_time ? new Date(props.appointment.end_time).toISOString().slice(0, 16) : '',
+      reason: props.appointment.reason || '',
+      notes: props.appointment.notes || '',
+      status: props.appointment.status || 'scheduled',
+    },
+    onSubmit: async ({ value }) => {
+      props.onSave(value);
+    },
+  }));
 
   return (
-    <form onSubmit={handleSubmit} class="space-y-4">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.handleSubmit();
+      }}
+      class="space-y-4"
+    >
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
-          <input
-            type="datetime-local"
-            value={formData().start_time}
-            onInput={(e) => setFormData(prev => ({ ...prev, start_time: e.currentTarget.value }))}
-            required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
+          <form.Field name="start_time" validators={{ onChange: ({ value }) => (!value ? 'Start time is required' : undefined) }}>
+            {(field) => (
+              <input
+                type="datetime-local"
+                value={field().state.value || ''}
+                onInput={(e) => field().handleChange(e.currentTarget.value)}
+                onBlur={field().handleBlur}
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            )}
+          </form.Field>
         </div>
         
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
-          <input
-            type="datetime-local"
-            value={formData().end_time}
-            onInput={(e) => setFormData(prev => ({ ...prev, end_time: e.currentTarget.value }))}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
+          <form.Field name="end_time">
+            {(field) => (
+              <input
+                type="datetime-local"
+                value={field().state.value || ''}
+                onInput={(e) => field().handleChange(e.currentTarget.value)}
+                onBlur={field().handleBlur}
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            )}
+          </form.Field>
         </div>
       </div>
 
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
-        <input
-          type="text"
-          value={formData().reason}
-          onInput={(e) => setFormData(prev => ({ ...prev, reason: e.currentTarget.value }))}
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
+        <form.Field name="reason">
+          {(field) => (
+            <input
+              type="text"
+              value={field().state.value || ''}
+              onInput={(e) => field().handleChange(e.currentTarget.value)}
+              onBlur={field().handleBlur}
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          )}
+        </form.Field>
       </div>
 
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-        <select
-          value={formData().status}
-          onInput={(e) => setFormData(prev => ({ ...prev, status: e.currentTarget.value }))}
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        >
-          <option value="scheduled">Scheduled</option>
-          <option value="confirmed">Confirmed</option>
-          <option value="in-progress">In Progress</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-          <option value="no_show">No Show</option>
-        </select>
+        <form.Field name="status">
+          {(field) => (
+            <select
+              value={field().state.value || 'scheduled'}
+              onInput={(e) => field().handleChange(e.currentTarget.value)}
+              onBlur={field().handleBlur}
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="scheduled">Scheduled</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="in-progress">In Progress</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="no_show">No Show</option>
+            </select>
+          )}
+        </form.Field>
       </div>
 
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-        <textarea
-          value={formData().notes}
-          onInput={(e) => setFormData(prev => ({ ...prev, notes: e.currentTarget.value }))}
-          rows={4}
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
+        <form.Field name="notes">
+          {(field) => (
+            <textarea
+              value={field().state.value || ''}
+              onInput={(e) => field().handleChange(e.currentTarget.value)}
+              onBlur={field().handleBlur}
+              rows={4}
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          )}
+        </form.Field>
       </div>
 
       <div class="flex items-center gap-3 pt-4">

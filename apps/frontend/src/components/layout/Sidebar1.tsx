@@ -147,7 +147,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
 };
 
 export const defaultNavItems: NavItem[] = [
-  { to: '/dashboard', label: 'Dashboard', icon: IconDashboard },
+  { to: '/', label: 'Dashboard', icon: IconDashboard },
   { to: '/patients', label: 'Patients', icon: IconUsers },
   { to: '/appointments', label: 'Appointments', icon: IconCalendar },
   { to: '/admin/users', label: 'Users', section: 'Admin', icon: IconUsers2 },

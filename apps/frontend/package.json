@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@kobalte/core": "^0.13.11",
+    "@tanstack/solid-form": "^1.19.1",
     "@tanstack/solid-query": "^5.83.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
