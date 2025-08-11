@@ -12,6 +12,8 @@ import Dashboard from './pages/Dashboard.tsx';
 import PatientsListPage from './pages/patients/PatientsListPage.tsx';
 import AppointmentsPage from './pages/appointments/AppointmentsPage.tsx';
 import AppointmentDetailPage from './pages/appointments/AppointmentDetailPage.tsx';
+import PatientDetailPage from './pages/patients/PatientDetailPage.tsx';
+import NewPatientPage from './pages/patients/NewPatientPage.tsx';
 
 // Root shell with providers
 const ProvidersShell: Component = () => {
@@ -69,6 +71,18 @@ const patientsRoute = createRoute({
   component: PatientsListPage,
 });
 
+const patientDetailRoute = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: '/patients/$id',
+  component: PatientDetailPage,
+});
+
+const newPatientRoute = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: '/patients/new',
+  component: NewPatientPage,
+});
+
 const appointmentsRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: '/appointments',
@@ -88,6 +102,8 @@ const routeTree = rootRoute.addChildren([
   appLayoutRoute.addChildren([
     dashboardRoute,
     patientsRoute,
+    patientDetailRoute,
+    newPatientRoute,
     appointmentsRoute,
     appointmentDetailRoute,
   ]),

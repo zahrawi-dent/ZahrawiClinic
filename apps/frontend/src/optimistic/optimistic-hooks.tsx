@@ -143,7 +143,7 @@ export function useRealtimeSubscription(collection: Collections) {
               queryClient.setQueriesData<ListResult<CollectionResponses[typeof collection]>>(
                 { queryKey: queryKeys.collection(collection), exact: false },
                 (old) => {
-                  if (!old || !e.record?.id) return old;
+                  if (!old || !e.record?.id || !(old as any).items) return old;
 
                   return {
                     ...old,
@@ -293,7 +293,7 @@ export function useCreateMutation<T extends Collections>(collection: T) {
         queryClient.setQueriesData<ListResult<CollectionResponses[T]>>(
           { queryKey: queryKeys.collection(collection), exact: false },
           (old) => {
-            if (!old) return old;
+            if (!old || !(old as any).items) return old;
 
             const newItems = [...old.items];
 
@@ -381,7 +381,7 @@ export function useCreateMutation<T extends Collections>(collection: T) {
           queryClient.setQueriesData<ListResult<CollectionResponses[T]>>(
             { queryKey: queryKeys.collection(collection), exact: false },
             (old) => {
-              if (!old) return old;
+              if (!old || !(old as any).items) return old;
 
               return {
                 ...old,
@@ -472,7 +472,7 @@ export function useDeleteMutation<T extends Collections>(collection: T) {
         queryClient.setQueriesData<ListResult<CollectionResponses[T]>>(
           { queryKey: queryKeys.collection(collection), exact: false },
           (old) => {
-            if (!old) return old;
+            if (!old || !(old as any).items) return old;
 
             // Find the exact query for rollback
             const currentQuery = queryClient.getQueryCache().find({
@@ -632,7 +632,7 @@ export function useUpdateMutation<T extends Collections>(collection: T) {
         queryClient.setQueriesData<ListResult<CollectionResponses[T]>>(
           { queryKey: queryKeys.collection(collection), exact: false },
           (old) => {
-            if (!old) return old;
+            if (!old || !(old as any).items) return old;
 
             // Store original data for rollback
             const currentQuery = queryClient.getQueryCache().find({
@@ -735,7 +735,7 @@ export function useUpdateMutation<T extends Collections>(collection: T) {
           queryClient.setQueriesData<ListResult<CollectionResponses[T]>>(
             { queryKey: queryKeys.collection(collection), exact: false },
             (old) => {
-              if (!old) return old;
+              if (!old || !(old as any).items) return old;
 
               return {
                 ...old,
