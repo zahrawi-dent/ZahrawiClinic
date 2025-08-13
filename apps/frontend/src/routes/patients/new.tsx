@@ -1,10 +1,17 @@
-import { type Component, createSignal, Show } from 'solid-js';
+import { createFileRoute } from '@tanstack/solid-router'
 import { createForm } from '@tanstack/solid-form';
 import { useNavigate } from '@tanstack/solid-router';
 import { Collections } from '../../types/pocketbase-types';
 import { useCreateMutation } from '../../data';
+import { createSignal, Show } from 'solid-js';
 
-const NewPatientPage: Component = () => {
+export const Route = createFileRoute('/patients/new')({
+  component: NewPatientPage,
+})
+
+
+
+function NewPatientPage() {
   const navigate = useNavigate();
   const createPatient = useCreateMutation(Collections.Patients);
   const [isSubmitting, setIsSubmitting] = createSignal(false);
@@ -42,26 +49,25 @@ const NewPatientPage: Component = () => {
   }));
 
   return (
-    <div class="min-h-screen bg-gray-50 p-6 space-y-6">
+    <div class="min-h-screen p-6 space-y-6">
       {/* Header */}
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl md:text-3xl font-bold text-gray-900">New Patient</h1>
-          <p class="text-gray-600">Create a patient profile to start tracking appointments and treatments</p>
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-100">New Patient</h1>
+          <p class="text-gray-200">Create a patient profile to start tracking appointments and treatments</p>
         </div>
       </div>
-
       {/* Form */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
           form.handleSubmit();
         }}
-        class="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+        class="rounded-lg shadow-sm border border-gray-200 p-6"
       >
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">First name</label>
+            <label class="block text-sm font-medium text-gray-200 mb-1">First name</label>
             <form.Field name="first_name" validators={{ onChange: ({ value }) => (!value ? 'First name is required' : undefined) }}>
               {(field) => (
                 <>
@@ -81,7 +87,7 @@ const NewPatientPage: Component = () => {
             </form.Field>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Last name</label>
+            <label class="block text-sm font-medium text-gray-200 mb-1">Last name</label>
             <form.Field name="last_name" validators={{ onChange: ({ value }) => (!value ? 'Last name is required' : undefined) }}>
               {(field) => (
                 <>
@@ -101,7 +107,7 @@ const NewPatientPage: Component = () => {
             </form.Field>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+            <label class="block text-sm font-medium text-gray-200 mb-1">Phone</label>
             <form.Field name="phone" validators={{ onChange: ({ value }) => (!value ? 'Phone is required' : undefined) }}>
               {(field) => (
                 <>
@@ -121,7 +127,7 @@ const NewPatientPage: Component = () => {
             </form.Field>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label class="block text-sm font-medium text-gray-200 mb-1">Email</label>
             <form.Field name="email" validators={{ onChange: ({ value }) => (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? 'Invalid email' : undefined) }}>
               {(field) => (
                 <>
@@ -141,7 +147,7 @@ const NewPatientPage: Component = () => {
             </form.Field>
           </div>
           <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+            <label class="block text-sm font-medium text-gray-200 mb-1">Address</label>
             <form.Field name="address">
               {(field) => (
                 <input
@@ -155,7 +161,7 @@ const NewPatientPage: Component = () => {
             </form.Field>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Date of birth</label>
+            <label class="block text-sm font-medium text-gray-200 mb-1">Date of birth</label>
             <form.Field name="dob">
               {(field) => (
                 <input
@@ -170,12 +176,12 @@ const NewPatientPage: Component = () => {
             </form.Field>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Sex</label>
+            <label class="block text-sm font-medium text-gray-200 mb-1">Sex</label>
             <form.Field name="sex">
               {(field) => (
                 <select
                   name="sex"
-                  class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="bg-slate-900 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   value={field().state.value as any}
                   onInput={(e) => field().handleChange(e.currentTarget.value as any)}
                   onBlur={field().handleBlur}
@@ -196,7 +202,5 @@ const NewPatientPage: Component = () => {
         </div>
       </form>
     </div>
-  );
+  )
 };
-
-export default NewPatientPage;

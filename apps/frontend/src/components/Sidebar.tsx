@@ -1,11 +1,11 @@
-import { 
-  createSignal, 
-  createEffect, 
-  For, 
-  Show, 
-  onMount, 
-  onCleanup, 
-  type Component, 
+import {
+  createSignal,
+  createEffect,
+  For,
+  Show,
+  onMount,
+  onCleanup,
+  type Component,
   type JSXElement,
   createMemo,
   Match,
@@ -126,9 +126,9 @@ const Kbd = (props: { children: any; class?: string }) => (
   </kbd>
 );
 
-const UserProfileDropdown = (props: { 
-  userProfile: { name: string; email: string; avatar?: string; role: string }; 
-  collapsed: boolean 
+const UserProfileDropdown = (props: {
+  userProfile: { name: string; email: string; avatar?: string; role: string };
+  collapsed: boolean
 }) => {
   const [isOpen, setIsOpen] = createSignal(false);
 
@@ -180,20 +180,20 @@ const UserProfileDropdown = (props: {
                 </div>
               }
             >
-              <img 
-                src={props.userProfile.avatar} 
+              <img
+                src={props.userProfile.avatar}
                 alt={props.userProfile.name}
                 class="w-10 h-10 rounded-full object-cover"
               />
             </Show>
             <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 border-2 border-slate-900 rounded-full"></div>
           </div>
-          
+
           <div class="flex-1 min-w-0 text-left">
             <p class="font-medium text-white truncate">{props.userProfile.name}</p>
             <p class="text-sm text-slate-400 truncate">{props.userProfile.role}</p>
           </div>
-          
+
           <div class={`transition-transform duration-200 ${isOpen() ? 'rotate-180' : ''}`}>
             <ChevronDownIcon />
           </div>
@@ -210,7 +210,7 @@ const UserProfileDropdown = (props: {
                 <UserIcon />
                 <span>Profile</span>
               </button>
-              
+
               <button
                 onClick={handleSettings}
                 class="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-300 hover:bg-slate-700/50 hover:text-white rounded-md transition-colors"
@@ -218,7 +218,7 @@ const UserProfileDropdown = (props: {
                 <SettingsIcon />
                 <span>Settings</span>
               </button>
-              
+
               <button
                 onClick={handleNotifications}
                 class="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-300 hover:bg-slate-700/50 hover:text-white rounded-md transition-colors"
@@ -226,7 +226,7 @@ const UserProfileDropdown = (props: {
                 <BellIcon />
                 <span>Notifications</span>
               </button>
-              
+
               <button
                 onClick={handleHelp}
                 class="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-300 hover:bg-slate-700/50 hover:text-white rounded-md transition-colors"
@@ -234,9 +234,9 @@ const UserProfileDropdown = (props: {
                 <HelpIcon />
                 <span>Help & Support</span>
               </button>
-              
+
               <div class="border-t border-slate-700/50 my-1"></div>
-              
+
               <button
                 onClick={handleSignOut}
                 class="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-md transition-colors"
@@ -248,7 +248,7 @@ const UserProfileDropdown = (props: {
           </div>
         </Show>
       </Show>
-      
+
       <Show when={props.collapsed}>
         <div class="flex justify-center">
           <div class="relative">
@@ -262,8 +262,8 @@ const UserProfileDropdown = (props: {
                 </div>
               }
             >
-              <img 
-                src={props.userProfile.avatar} 
+              <img
+                src={props.userProfile.avatar}
                 alt={props.userProfile.name}
                 class="w-10 h-10 rounded-full object-cover"
               />
@@ -278,12 +278,11 @@ const UserProfileDropdown = (props: {
 
 const Badge = (props: { children: any; variant?: 'default' | 'success' | 'warning' | 'error' }) => (
   <span
-    class={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 text-xs font-medium rounded-full ${
-      props.variant === 'success' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-      props.variant === 'warning' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-      props.variant === 'error' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-      'bg-slate-600/30 text-slate-300 border border-slate-600/50'
-    }`}
+    class={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 text-xs font-medium rounded-full ${props.variant === 'success' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+        props.variant === 'warning' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+          props.variant === 'error' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+            'bg-slate-600/30 text-slate-300 border border-slate-600/50'
+      }`}
   >
     {props.children}
   </span>
@@ -302,10 +301,10 @@ const NavSection = (props: { title?: string; children: JSXElement; collapsed: bo
   </div>
 );
 
-const NavItemComponent = (props: { 
-  item: NavItem; 
-  isActive: boolean; 
-  collapsed: boolean; 
+const NavItemComponent = (props: {
+  item: NavItem;
+  isActive: boolean;
+  collapsed: boolean;
   onClick?: () => void;
 }) => {
   const [isExpanded, setIsExpanded] = createSignal(false);
@@ -322,11 +321,10 @@ const NavItemComponent = (props: {
     <div class="space-y-1">
       <Link
         to={props.item.to}
-        class={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
-          props.isActive
+        class={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${props.isActive
             ? 'bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-300 shadow-lg shadow-teal-500/10 border border-teal-500/30'
             : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'
-        } ${props.collapsed ? 'justify-center' : ''}`}
+          } ${props.collapsed ? 'justify-center' : ''}`}
         onClick={(e) => {
           toggleExpanded(e);
           props.onClick?.();
@@ -335,20 +333,19 @@ const NavItemComponent = (props: {
         <Show when={props.item.icon}>
           {(() => {
             const IconComponent = props.item.icon!;
-            return <IconComponent class={`h-5 w-5 shrink-0 transition-colors duration-200 ${
-              props.isActive ? 'text-teal-300' : 'text-slate-400 group-hover:text-white'
-            }`} />;
+            return <IconComponent class={`h-5 w-5 shrink-0 transition-colors duration-200 ${props.isActive ? 'text-teal-300' : 'text-slate-400 group-hover:text-white'
+              }`} />;
           })()}
         </Show>
-        
+
         <Show when={!props.collapsed}>
           <span class="flex-1 truncate">{props.item.label}</span>
-          
+
           <div class="flex items-center gap-2">
             <Show when={props.item.badge}>
               <Badge>{props.item.badge}</Badge>
             </Show>
-            
+
             <Show when={hasChildren()}>
               <div class={`transition-transform duration-200 ${isExpanded() ? 'rotate-90' : ''}`}>
                 <ChevronRightIcon />
@@ -368,9 +365,9 @@ const NavItemComponent = (props: {
         <div class="ml-6 space-y-1 border-l border-slate-700/50 pl-4">
           <For each={props.item.children}>
             {(child) => (
-              <NavItemComponent 
-                item={child} 
-                isActive={false} 
+              <NavItemComponent
+                item={child}
+                isActive={false}
                 collapsed={false}
                 onClick={props.onClick}
               />
@@ -386,7 +383,7 @@ const NavItemComponent = (props: {
 export function Sidebar(props: SidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const [isSearchOpen, setIsSearchOpen] = createSignal(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = createSignal(false);
   const [isCollapsed, setIsCollapsed] = createSignal(props.defaultCollapsed ?? false);
@@ -394,22 +391,22 @@ export function Sidebar(props: SidebarProps) {
   // Group items by section
   const groupedItems = createMemo(() => {
     const groups: Record<string, NavItem[]> = {};
-    
+
     props.items.forEach(item => {
       if (item.hidden) return;
       const section = item.section || 'main';
       if (!groups[section]) groups[section] = [];
       groups[section].push(item);
     });
-    
+
     return groups;
   });
 
   // Check if current path matches nav item
   const isActiveNavItem = createMemo(() => (itemPath: string) => {
     const currentPath = location().pathname;
-    return currentPath === itemPath || 
-           (itemPath !== '/' && currentPath.startsWith(itemPath));
+    return currentPath === itemPath ||
+      (itemPath !== '/' && currentPath.startsWith(itemPath));
   });
 
   // ===== EVENT HANDLERS =====
@@ -427,8 +424,8 @@ export function Sidebar(props: SidebarProps) {
   });
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "/" && !isSearchOpen() && 
-        !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName || "")) {
+    if (e.key === "/" && !isSearchOpen() &&
+      !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName || "")) {
       e.preventDefault();
       setIsSearchOpen(true);
       return;
@@ -442,7 +439,7 @@ export function Sidebar(props: SidebarProps) {
   };
 
   const toggleSearch = () => setIsSearchOpen(prev => !prev);
-  
+
   const toggleMobileMenu = () => {
     const nextState = !isMobileMenuOpen();
     setIsMobileMenuOpen(nextState);
@@ -476,7 +473,7 @@ export function Sidebar(props: SidebarProps) {
             Zahrawi
           </span>
         </Link>
-        
+
         <div class="flex items-center gap-2">
           <button
             onClick={toggleSearch}
@@ -508,18 +505,14 @@ export function Sidebar(props: SidebarProps) {
       {/* Sidebar */}
       <div class="flex flex-col pt-16 lg:flex-row lg:pt-0">
         <aside
-          class={`fixed inset-y-0 left-0 z-30 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/80 text-slate-300 transition-all duration-300 ease-in-out lg:sticky lg:translate-x-0 flex h-screen flex-col lg:h-auto lg:max-h-screen ${
-            isMobileMenuOpen() ? "translate-x-0" : "-translate-x-full"
-          } ${
-            isMobileMenuOpen() ? "mt-16 lg:mt-0" : "mt-16 lg:mt-0"
-          } ${
-            isCollapsed() ? "w-16" : "w-64"
-          }`}
+          class={`fixed inset-y-0 left-0 z-30 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/80 text-slate-300 transition-all duration-300 ease-in-out lg:sticky lg:translate-x-0 flex h-screen flex-col lg:h-auto lg:max-h-screen ${isMobileMenuOpen() ? "translate-x-0" : "-translate-x-full"
+            } ${isMobileMenuOpen() ? "mt-16 lg:mt-0" : "mt-16 lg:mt-0"
+            } ${isCollapsed() ? "w-16" : "w-64"
+            }`}
         >
           {/* Desktop Header */}
-          <div class={`hidden shrink-0 items-center justify-between border-b border-slate-800/50 p-4 lg:flex ${
-            isCollapsed() ? 'px-3' : ''
-          }`}>
+          <div class={`hidden shrink-0 items-center justify-between border-b border-slate-800/50 p-4 lg:flex ${isCollapsed() ? 'px-3' : ''
+            }`}>
             <Show when={!isCollapsed()}>
               <Link to="/" class="flex items-center gap-3">
                 <div class="text-teal-400">
@@ -530,13 +523,13 @@ export function Sidebar(props: SidebarProps) {
                 </span>
               </Link>
             </Show>
-            
+
             <Show when={isCollapsed()}>
               <Link to="/" class="text-teal-400 mx-auto">
                 <ZahrawiIcon />
               </Link>
             </Show>
-            
+
             <div class={`flex items-center gap-2 ${isCollapsed() ? 'hidden' : ''}`}>
               <button
                 onClick={toggleSearch}
@@ -565,14 +558,13 @@ export function Sidebar(props: SidebarProps) {
           </div>
 
           {/* Navigation */}
-          <nav class={`flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-700/50 ${
-            isCollapsed() ? 'p-2' : 'p-4'
-          }`}>
+          <nav class={`flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-700/50 ${isCollapsed() ? 'p-2' : 'p-4'
+            }`}>
             <div class="space-y-6">
               <For each={Object.entries(groupedItems())}>
                 {([section, items]) => (
-                  <NavSection 
-                    title={section !== 'main' ? section : undefined} 
+                  <NavSection
+                    title={section !== 'main' ? section : undefined}
                     collapsed={isCollapsed()}
                   >
                     <div class="space-y-1">
@@ -596,9 +588,9 @@ export function Sidebar(props: SidebarProps) {
           {/* User Profile Footer */}
           <Show when={props.userProfile}>
             <div class={`shrink-0 border-t border-slate-800/50 ${isCollapsed() ? 'p-2' : 'p-4'}`}>
-              <UserProfileDropdown 
-                userProfile={props.userProfile!} 
-                collapsed={isCollapsed()} 
+              <UserProfileDropdown
+                userProfile={props.userProfile!}
+                collapsed={isCollapsed()}
               />
             </div>
           </Show>
@@ -606,10 +598,10 @@ export function Sidebar(props: SidebarProps) {
 
         {/* Mobile Overlay */}
         <Show when={isMobileMenuOpen()}>
-          <div 
-            class="fixed inset-0 z-20 bg-black/50 backdrop-blur-sm lg:hidden" 
-            onClick={toggleMobileMenu} 
-            aria-hidden="true" 
+          <div
+            class="fixed inset-0 z-20 bg-black/50 backdrop-blur-sm lg:hidden"
+            onClick={toggleMobileMenu}
+            aria-hidden="true"
           />
         </Show>
       </div>
@@ -650,34 +642,34 @@ export const IconClinic: Component<{ class?: string }> = (props) => (
 
 // ===== DEFAULT NAV ITEMS =====
 export const defaultNavItems: NavItem[] = [
-  { 
-    to: '/dashboard', 
-    label: 'Dashboard', 
+  {
+    to: '/',
+    label: 'Dashboard',
     icon: IconDashboard,
     badge: '2'
   },
-  { 
-    to: '/patients', 
-    label: 'Patients', 
+  {
+    to: '/patients',
+    label: 'Patients',
     icon: IconUsers,
     badge: '12'
   },
-  { 
-    to: '/appointments', 
-    label: 'Appointments', 
+  {
+    to: '/appointments',
+    label: 'Appointments',
     icon: IconCalendar,
     badge: '3'
   },
-  { 
-    to: '/admin/users', 
-    label: 'Users', 
-    section: 'Administration', 
-    icon: IconUsers2 
+  {
+    to: '/admin/users',
+    label: 'Users',
+    section: 'Administration',
+    icon: IconUsers2
   },
-  { 
-    to: '/admin/clinics', 
-    label: 'Clinics', 
-    section: 'Administration', 
-    icon: IconClinic 
+  {
+    to: '/admin/clinics',
+    label: 'Clinics',
+    section: 'Administration',
+    icon: IconClinic
   },
 ];

@@ -1,15 +1,16 @@
-import { 
-  type Component, 
-  createSignal, 
-  createMemo, 
-  Show, 
-  For, 
-  Switch, 
-  Match,
-  onMount 
+import { createFileRoute } from '@tanstack/solid-router'
+import {
+  type Component,
+  createMemo,
+  For,
 } from 'solid-js';
-import { useAuth } from '../auth/AuthContext';
+import { useAuth } from '../../auth/AuthContext';
 import { useNavigate } from '@tanstack/solid-router';
+
+export const Route = createFileRoute('/(app)/')({
+  component: Dashboard,
+})
+
 
 // ===== TYPES =====
 interface DashboardStats {
@@ -93,23 +94,22 @@ const ArrowRightIcon = () => (
 );
 
 // ===== COMPONENTS =====
-const StatCard = (props: { 
-  title: string; 
-  value: string | number; 
-  icon: Component; 
-  trend?: string; 
+const StatCard = (props: {
+  title: string;
+  value: string | number;
+  icon: Component;
+  trend?: string;
   trendType?: 'up' | 'down';
   color?: string;
 }) => (
-  <div class={`bg-white rounded-lg shadow-sm border border-gray-200 p-6 ${props.color || ''}`}>
+  <div class={`rounded-lg shadow-sm border border-gray-200 p-6 ${props.color || ''}`}>
     <div class="flex items-center justify-between">
       <div>
-        <p class="text-sm font-medium text-gray-600">{props.title}</p>
-        <p class="text-2xl font-bold text-gray-900 mt-1">{props.value}</p>
+        <p class="text-sm font-medium text-gray-100">{props.title}</p>
+        <p class="text-2xl font-bold text-gray-200 mt-1">{props.value}</p>
         {props.trend && (
-          <div class={`flex items-center mt-2 text-sm ${
-            props.trendType === 'up' ? 'text-green-600' : 'text-red-600'
-          }`}>
+          <div class={`flex items-center mt-2 text-sm ${props.trendType === 'up' ? 'text-green-600' : 'text-red-600'
+            }`}>
             <span>{props.trend}</span>
           </div>
         )}
@@ -121,23 +121,23 @@ const StatCard = (props: {
   </div>
 );
 
-const QuickActionCard = (props: { 
-  title: string; 
-  description: string; 
-  icon: Component; 
+const QuickActionCard = (props: {
+  title: string;
+  description: string;
+  icon: Component;
   onClick: () => void;
   color?: string;
 }) => (
   <button
     onClick={props.onClick}
-    class={`w-full bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-left hover:shadow-md transition-shadow ${props.color || ''}`}
+    class={`w-full rounded-lg shadow-sm border border-gray-200 p-6 text-left hover:shadow-md transition-shadow ${props.color || ''}`}
   >
     <div class="flex items-center justify-between">
       <div class="flex-1">
-        <h3 class="text-lg font-semibold text-gray-900">{props.title}</h3>
-        <p class="text-sm text-gray-600 mt-1">{props.description}</p>
+        <h3 class="text-lg font-semibold text-gray-100">{props.title}</h3>
+        <p class="text-sm text-gray-200 mt-1">{props.description}</p>
       </div>
-      <div class="text-gray-400">
+      <div class="text-gray-300">
         <props.icon />
       </div>
     </div>
@@ -145,19 +145,18 @@ const QuickActionCard = (props: {
 );
 
 const AppointmentCard = (props: { appointment: Appointment }) => (
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+  <div class="rounded-lg shadow-sm border border-gray-200 p-4">
     <div class="flex items-center justify-between">
       <div class="flex-1">
-        <h4 class="font-medium text-gray-900">{props.appointment.patientName}</h4>
-        <p class="text-sm text-gray-600">{props.appointment.type}</p>
-        <p class="text-sm text-gray-500">{props.appointment.time}</p>
+        <h4 class="font-medium text-gray-100">{props.appointment.patientName}</h4>
+        <p class="text-sm text-gray-200">{props.appointment.type}</p>
+        <p class="text-sm text-gray-200">{props.appointment.time}</p>
       </div>
-      <div class={`px-2 py-1 rounded-full text-xs font-medium ${
-        props.appointment.status === 'scheduled' ? 'bg-blue-100 text-blue-800' :
+      <div class={`px-2 py-1 rounded-full text-xs font-medium ${props.appointment.status === 'scheduled' ? 'bg-blue-100 text-blue-800' :
         props.appointment.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800' :
-        props.appointment.status === 'completed' ? 'bg-green-100 text-green-800' :
-        'bg-red-100 text-red-800'
-      }`}>
+          props.appointment.status === 'completed' ? 'bg-green-100 text-green-800' :
+            'bg-red-100 text-red-800'
+        }`}>
         {props.appointment.status}
       </div>
     </div>
@@ -165,16 +164,15 @@ const AppointmentCard = (props: { appointment: Appointment }) => (
 );
 
 const PatientCard = (props: { patient: Patient }) => (
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+  <div class="rounded-lg shadow-sm border border-gray-200 p-4">
     <div class="flex items-center justify-between">
       <div class="flex-1">
-        <h4 class="font-medium text-gray-900">{props.patient.name}</h4>
-        <p class="text-sm text-gray-600">{props.patient.email}</p>
-        <p class="text-sm text-gray-500">Last visit: {props.patient.lastVisit}</p>
+        <h4 class="font-medium text-gray-100">{props.patient.name}</h4>
+        <p class="text-sm text-gray-200">{props.patient.email}</p>
+        <p class="text-sm text-gray-200">Last visit: {props.patient.lastVisit}</p>
       </div>
-      <div class={`px-2 py-1 rounded-full text-xs font-medium ${
-        props.patient.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-      }`}>
+      <div class={`px-2 py-1 rounded-full text-xs font-medium ${props.patient.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+        }`}>
         {props.patient.status}
       </div>
     </div>
@@ -273,8 +271,8 @@ const ReceptionistDashboard = () => {
     <div class="space-y-6">
       {/* Header */}
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">Receptionist Dashboard</h1>
-        <p class="text-gray-600">Manage appointments and patient interactions</p>
+        <h1 class="text-2xl font-bold text-gray-100">Receptionist Dashboard</h1>
+        <p class="text-gray-200">Manage appointments and patient interactions</p>
       </div>
 
       {/* Stats */}
@@ -311,7 +309,7 @@ const ReceptionistDashboard = () => {
 
       {/* Quick Actions */}
       <div>
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <h2 class="text-lg font-semibold text-gray-100 mb-4">Quick Actions</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <For each={quickActions}>
             {(action) => (
@@ -329,7 +327,7 @@ const ReceptionistDashboard = () => {
       {/* Today's Appointments */}
       <div>
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-900">Today's Appointments</h2>
+          <h2 class="text-lg font-semibold text-gray-100">Today's Appointments</h2>
           <button
             onClick={() => navigate({ to: '/appointments' })}
             class="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
@@ -378,8 +376,8 @@ const DentistDashboard = () => {
     <div class="space-y-6">
       {/* Header */}
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">Dentist Dashboard</h1>
-        <p class="text-gray-600">Patient care and treatment management</p>
+        <h1 class="text-2xl font-bold text-gray-100">Dentist Dashboard</h1>
+        <p class="text-gray-200">Patient care and treatment management</p>
       </div>
 
       {/* Stats */}
@@ -416,7 +414,7 @@ const DentistDashboard = () => {
 
       {/* Quick Actions */}
       <div>
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <h2 class="text-lg font-semibold text-gray-100 mb-4">Quick Actions</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <For each={quickActions}>
             {(action) => (
@@ -434,7 +432,7 @@ const DentistDashboard = () => {
       {/* Recent Patients */}
       <div>
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-900">Recent Patients</h2>
+          <h2 class="text-lg font-semibold text-gray-100">Recent Patients</h2>
           <button
             onClick={() => navigate({ to: '/patients' })}
             class="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
@@ -483,8 +481,8 @@ const AdministratorDashboard = () => {
     <div class="space-y-6">
       {/* Header */}
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">Administrator Dashboard</h1>
-        <p class="text-gray-600">System administration and user management</p>
+        <h1 class="text-2xl font-bold text-gray-100">Administrator Dashboard</h1>
+        <p class="text-gray-200">System administration and user management</p>
       </div>
 
       {/* Stats */}
@@ -521,7 +519,7 @@ const AdministratorDashboard = () => {
 
       {/* Quick Actions */}
       <div>
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <h2 class="text-lg font-semibold text-gray-100 mb-4">Quick Actions</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <For each={quickActions}>
             {(action) => (
@@ -537,19 +535,19 @@ const AdministratorDashboard = () => {
       </div>
 
       {/* System Overview */}
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">System Overview</h2>
+      <div class="rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 class="text-lg font-semibold text-gray-100 mb-4">System Overview</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h3 class="font-medium text-gray-900 mb-2">Recent Activity</h3>
-            <div class="space-y-2 text-sm text-gray-600">
+            <h3 class="font-medium text-gray-200 mb-2">Recent Activity</h3>
+            <div class="space-y-2 text-sm text-gray-200">
               <div>• New user registration: Dr. Sarah Wilson</div>
               <div>• System backup completed successfully</div>
               <div>• Clinic settings updated</div>
             </div>
           </div>
           <div>
-            <h3 class="font-medium text-gray-900 mb-2">System Status</h3>
+            <h3 class="font-medium text-gray-200 mb-2">System Status</h3>
             <div class="space-y-2 text-sm">
               <div class="flex items-center justify-between">
                 <span>Database</span>
@@ -599,8 +597,8 @@ const ManagerDashboard = () => {
     <div class="space-y-6">
       {/* Header */}
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">Manager Dashboard</h1>
-        <p class="text-gray-600">Business analytics and performance insights</p>
+        <h1 class="text-2xl font-bold text-gray-100">Manager Dashboard</h1>
+        <p class="text-gray-200">Business analytics and performance insights</p>
       </div>
 
       {/* Stats */}
@@ -637,7 +635,7 @@ const ManagerDashboard = () => {
 
       {/* Quick Actions */}
       <div>
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <h2 class="text-lg font-semibold text-gray-200 mb-4">Quick Actions</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <For each={quickActions}>
             {(action) => (
@@ -654,37 +652,37 @@ const ManagerDashboard = () => {
 
       {/* Performance Overview */}
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">Revenue Trends</h2>
+        <div class="rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 class="text-lg font-semibold text-gray-100 mb-4">Revenue Trends</h2>
           <div class="space-y-3">
             <div class="flex items-center justify-between">
-              <span class="text-sm text-gray-600">This Month</span>
+              <span class="text-sm text-gray-200">This Month</span>
               <span class="font-medium">$45,600</span>
             </div>
             <div class="flex items-center justify-between">
-              <span class="text-sm text-gray-600">Last Month</span>
+              <span class="text-sm text-gray-200">Last Month</span>
               <span class="font-medium">$42,100</span>
             </div>
             <div class="flex items-center justify-between">
-              <span class="text-sm text-gray-600">Growth</span>
+              <span class="text-sm text-gray-200">Growth</span>
               <span class="text-green-600 font-medium">+8.5%</span>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">Key Metrics</h2>
+        <div class="rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 class="text-lg font-semibold text-gray-100 mb-4">Key Metrics</h2>
           <div class="space-y-3">
             <div class="flex items-center justify-between">
-              <span class="text-sm text-gray-600">Average Patient Wait Time</span>
+              <span class="text-sm text-gray-200">Average Patient Wait Time</span>
               <span class="font-medium">12 min</span>
             </div>
             <div class="flex items-center justify-between">
-              <span class="text-sm text-gray-600">Treatment Completion Rate</span>
+              <span class="text-sm text-gray-200">Treatment Completion Rate</span>
               <span class="font-medium">96%</span>
             </div>
             <div class="flex items-center justify-between">
-              <span class="text-sm text-gray-600">Staff Utilization</span>
+              <span class="text-sm text-gray-200">Staff Utilization</span>
               <span class="font-medium">87%</span>
             </div>
           </div>
@@ -695,9 +693,9 @@ const ManagerDashboard = () => {
 };
 
 // ===== MAIN DASHBOARD COMPONENT =====
-const Dashboard: Component = () => {
+function Dashboard() {
   const { authState } = useAuth();
-  
+
   const userRole = createMemo(() => {
     const auth = authState();
     return auth.role;
@@ -705,7 +703,7 @@ const Dashboard: Component = () => {
 
   const getDashboardComponent = () => {
     const role = userRole();
-    
+
     switch (role) {
       case 'receptionist':
         return ReceptionistDashboard;
@@ -729,7 +727,7 @@ const Dashboard: Component = () => {
   const DashboardComponent = getDashboardComponent();
 
   return (
-    <div class="min-h-screen bg-gray-50 p-6">
+    <div class="min-h-screen bg-slate-900 p-6">
       <DashboardComponent />
     </div>
   );

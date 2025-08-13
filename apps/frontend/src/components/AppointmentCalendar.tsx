@@ -1,11 +1,9 @@
-import { 
-  type Component, 
-  createSignal, 
-  createMemo, 
-  For, 
-  Show, 
-  onMount,
-  createEffect 
+import {
+  type Component,
+  createSignal,
+  createMemo,
+  For,
+  Show,
 } from 'solid-js';
 import { useNavigate } from '@tanstack/solid-router';
 
@@ -201,33 +199,33 @@ const getMonthDays = (year: number, month: number) => {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   const days = [];
-  
+
   // Add previous month's days
   const firstDayOfWeek = firstDay.getDay();
   for (let i = firstDayOfWeek - 1; i >= 0; i--) {
     const date = new Date(year, month, -i);
     days.push({ date, isCurrentMonth: false });
   }
-  
+
   // Add current month's days
   for (let day = 1; day <= lastDay.getDate(); day++) {
     const date = new Date(year, month, day);
     days.push({ date, isCurrentMonth: true });
   }
-  
+
   // Add next month's days
   const remainingDays = 42 - days.length; // 6 rows * 7 days
   for (let day = 1; day <= remainingDays; day++) {
     const date = new Date(year, month + 1, day);
     days.push({ date, isCurrentMonth: false });
   }
-  
+
   return days;
 };
 
 // ===== COMPONENTS =====
-const AppointmentCard = (props: { 
-  appointment: Appointment; 
+const AppointmentCard = (props: {
+  appointment: Appointment;
   onClick: () => void;
   isCompact?: boolean;
 }) => {
@@ -282,24 +280,24 @@ const AppointmentCard = (props: {
             {props.appointment.status}
           </div>
         </div>
-        
+
         <div class="space-y-1">
           <div class="flex items-center gap-2 text-sm text-gray-600">
             <StethoscopeIcon />
             <span>{props.appointment.type}</span>
           </div>
-          
+
           <div class="flex items-center gap-2 text-sm text-gray-600">
             <UserIcon />
             <span>{props.appointment.dentist}</span>
           </div>
-          
+
           <div class="flex items-center gap-2 text-sm text-gray-600">
             <ClockIcon />
             <span>{formatTime(props.appointment.time)} - {formatTime(props.appointment.endTime)}</span>
           </div>
         </div>
-        
+
         {props.appointment.notes && (
           <p class="text-xs text-gray-500 truncate">{props.appointment.notes}</p>
         )}
@@ -308,14 +306,14 @@ const AppointmentCard = (props: {
   );
 };
 
-const DailyView = (props: { 
-  date: Date; 
-  appointments: Appointment[]; 
+const DailyView = (props: {
+  date: Date;
+  appointments: Appointment[];
   onAppointmentClick: (appointment: Appointment) => void;
 }) => {
   const timeSlots = getTimeSlots();
-  const dayAppointments = createMemo(() => 
-    props.appointments.filter(apt => 
+  const dayAppointments = createMemo(() =>
+    props.appointments.filter(apt =>
       apt.date === props.date.toISOString().split('T')[0]
     )
   );
@@ -325,18 +323,18 @@ const DailyView = (props: {
   };
 
   return (
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div class="rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div class="p-4 border-b border-gray-200">
         <h3 class="text-lg font-semibold text-gray-900">
-          {props.date.toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
+          {props.date.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
           })}
         </h3>
       </div>
-      
+
       <div class="overflow-y-auto max-h-96">
         <div class="grid grid-cols-1 gap-2 p-4">
           <For each={timeSlots}>
@@ -346,7 +344,7 @@ const DailyView = (props: {
                 <div class="border-b border-gray-100 pb-2 last:border-b-0">
                   <div class="flex items-start gap-4">
                     <div class="w-16 flex-shrink-0 pt-2">
-                      <span class="text-sm font-medium text-gray-600">{formatTime(timeSlot)}</span>
+                      <span class="text-sm font-medium text-gray-200">{formatTime(timeSlot)}</span>
                     </div>
                     <div class="flex-1 space-y-2">
                       <For each={appointments}>
@@ -358,7 +356,7 @@ const DailyView = (props: {
                         )}
                       </For>
                       {appointments.length === 0 && (
-                        <div class="h-12 flex items-center justify-center text-gray-400 text-sm">
+                        <div class="h-12 flex items-center justify-center text-gray-300 text-sm">
                           No appointments
                         </div>
                       )}
@@ -374,34 +372,34 @@ const DailyView = (props: {
   );
 };
 
-const WeeklyView = (props: { 
-  startDate: Date; 
-  appointments: Appointment[]; 
+const WeeklyView = (props: {
+  startDate: Date;
+  appointments: Appointment[];
   onAppointmentClick: (appointment: Appointment) => void;
 }) => {
   const weekDays = getWeekDays(props.startDate);
-  
+
   const getAppointmentsForDate = (date: Date) => {
     const dateStr = date.toISOString().split('T')[0];
     return props.appointments.filter(apt => apt.date === dateStr);
   };
 
   return (
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div class="rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div class="p-4 border-b border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-900">
+        <h3 class="text-lg font-semibold text-gray-100">
           Week of {weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
         </h3>
       </div>
-      
+
       <div class="grid grid-cols-7 gap-1 p-4">
         <For each={weekDays}>
           {(day, index) => {
             const appointments = createMemo(() => getAppointmentsForDate(day));
             const isToday = day.toDateString() === new Date().toDateString();
-            
+
             return (
-              <div class={`min-h-32 p-2 ${isToday ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'} rounded-lg`}>
+              <div class={`min-h-32 p-2 ${isToday ? 'bg-blue-100 border border-blue-200' : 'bg-slate-200'} rounded-lg`}>
                 <div class="text-center mb-2">
                   <div class={`text-sm font-medium ${isToday ? 'text-blue-600' : 'text-gray-600'}`}>
                     {day.toLocaleDateString('en-US', { weekday: 'short' })}
@@ -410,7 +408,7 @@ const WeeklyView = (props: {
                     {day.getDate()}
                   </div>
                 </div>
-                
+
                 <div class="space-y-1">
                   <For each={appointments().slice(0, 3)}>
                     {(appointment) => (
@@ -421,7 +419,7 @@ const WeeklyView = (props: {
                       />
                     )}
                   </For>
-                  
+
                   {appointments().length > 3 && (
                     <div class="text-xs text-gray-500 text-center">
                       +{appointments().length - 3} more
@@ -437,63 +435,63 @@ const WeeklyView = (props: {
   );
 };
 
-const MonthlyView = (props: { 
-  year: number; 
-  month: number; 
-  appointments: Appointment[]; 
+const MonthlyView = (props: {
+  year: number;
+  month: number;
+  appointments: Appointment[];
   onAppointmentClick: (appointment: Appointment) => void;
 }) => {
   const monthDays = getMonthDays(props.year, props.month);
   const monthName = new Date(props.year, props.month).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  
+
   const getAppointmentsForDate = (date: Date) => {
     const dateStr = date.toISOString().split('T')[0];
     return props.appointments.filter(apt => apt.date === dateStr);
   };
 
   return (
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div class="rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div class="p-4 border-b border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-900">{monthName}</h3>
+        <h3 class="text-lg font-semibold text-gray-100">{monthName}</h3>
       </div>
-      
+
       <div class="p-4">
         <div class="grid grid-cols-7 gap-1">
           {/* Day headers */}
           <For each={['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']}>
             {(day) => (
-              <div class="text-center p-2 text-sm font-medium text-gray-600">
+              <div class="text-center p-2 text-sm font-medium text-gray-200">
                 {day}
               </div>
             )}
           </For>
-          
+
           {/* Calendar days */}
           <For each={monthDays}>
             {(dayData) => {
               const appointments = createMemo(() => getAppointmentsForDate(dayData.date));
               const isToday = dayData.date.toDateString() === new Date().toDateString();
-              
+
               return (
-                <div class={`min-h-24 p-1 ${isToday ? 'bg-blue-50 border border-blue-200' : ''} ${!dayData.isCurrentMonth ? 'bg-gray-100' : 'bg-white'} rounded-lg`}>
+                <div class={`min-h-24 p-1 ${isToday ? 'bg-blue-500 border border-blue-200' : ''} ${!dayData.isCurrentMonth ? 'bg-slate-400' : 'bg-slate-200'} rounded-lg`}>
                   <div class="text-right mb-1">
-                    <span class={`text-sm ${isToday ? 'text-blue-600 font-bold' : dayData.isCurrentMonth ? 'text-gray-900' : 'text-gray-400'}`}>
+                    <span class={`text-sm ${isToday ? 'text-blue-600 font-bold' : dayData.isCurrentMonth ? 'text-gray-900' : 'text-gray-100'}`}>
                       {dayData.date.getDate()}
                     </span>
                   </div>
-                  
+
                   <div class="space-y-1">
                     <For each={appointments().slice(0, 2)}>
                       {(appointment) => (
                         <div
                           onClick={() => props.onAppointmentClick(appointment)}
-                          class="text-xs p-1 bg-blue-100 text-blue-800 rounded cursor-pointer hover:bg-blue-200 transition-colors truncate"
+                          class="text-xs p-1 bg-blue-300 text-blue-800 rounded cursor-pointer hover:bg-blue-400 transition-colors truncate"
                         >
                           {appointment.patientName}
                         </div>
                       )}
                     </For>
-                    
+
                     {appointments().length > 2 && (
                       <div class="text-xs text-gray-500 text-center">
                         +{appointments().length - 2}
@@ -518,7 +516,7 @@ interface AppointmentCalendarProps {
 
 const AppointmentCalendar: Component<AppointmentCalendarProps> = (props) => {
   const navigate = useNavigate();
-  
+
   const [currentView, setCurrentView] = createSignal<'daily' | 'weekly' | 'monthly'>('weekly');
   const [currentDate, setCurrentDate] = createSignal(new Date());
   const [selectedAppointment, setSelectedAppointment] = createSignal<Appointment | null>(null);
@@ -533,7 +531,7 @@ const AppointmentCalendar: Component<AppointmentCalendarProps> = (props) => {
 
   const navigateDate = (direction: 'prev' | 'next') => {
     const newDate = new Date(currentDate());
-    
+
     switch (currentView()) {
       case 'daily':
         newDate.setDate(newDate.getDate() + (direction === 'next' ? 1 : -1));
@@ -545,7 +543,7 @@ const AppointmentCalendar: Component<AppointmentCalendarProps> = (props) => {
         newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
         break;
     }
-    
+
     setCurrentDate(newDate);
   };
 
@@ -561,11 +559,11 @@ const AppointmentCalendar: Component<AppointmentCalendarProps> = (props) => {
   const getCurrentPeriodLabel = () => {
     switch (currentView()) {
       case 'daily':
-        return currentDate().toLocaleDateString('en-US', { 
-          weekday: 'long', 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
+        return currentDate().toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
         });
       case 'weekly':
         const weekStart = new Date(currentDate());
@@ -583,10 +581,10 @@ const AppointmentCalendar: Component<AppointmentCalendarProps> = (props) => {
       {/* Header */}
       <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-2xl font-bold text-gray-900">Appointment Calendar</h2>
-          <p class="text-gray-600">Manage and view patient appointments</p>
+          <h2 class="text-2xl font-bold text-gray-100">Appointment Calendar</h2>
+          <p class="text-gray-200">Manage and view patient appointments</p>
         </div>
-        
+
         <button
           onClick={handleNewAppointment}
           class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -597,19 +595,18 @@ const AppointmentCalendar: Component<AppointmentCalendarProps> = (props) => {
       </div>
 
       {/* Controls */}
-      <div class="flex items-center justify-between bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+      <div class="flex items-center justify-between rounded-lg shadow-sm border border-gray-200 p-4">
         <div class="flex items-center gap-4">
           {/* View Toggle */}
-          <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+          <div class="flex items-center gap-1 rounded-lg p-1">
             <For each={views}>
               {(view) => (
                 <button
                   onClick={() => setCurrentView(view.type)}
-                  class={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    currentView() === view.type
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
+                  class={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentView() === view.type
+                    ? 'bg-slate-800 text-blue-500 shadow-sm'
+                    : 'text-gray-400 hover:text-gray-200'
+                    }`}
                 >
                   <view.icon />
                   <span>{view.label}</span>
@@ -624,18 +621,18 @@ const AppointmentCalendar: Component<AppointmentCalendarProps> = (props) => {
           <div class="flex items-center gap-2">
             <button
               onClick={() => navigateDate('prev')}
-              class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              class="p-2 text-gray-300 hover:text-gray-200 hover:bg-slate-800 rounded-lg transition-colors"
             >
               <ChevronLeftIcon />
             </button>
-            
+
             <div class="text-center">
-              <div class="text-lg font-semibold text-gray-900">{getCurrentPeriodLabel()}</div>
+              <div class="text-lg font-semibold text-gray-200">{getCurrentPeriodLabel()}</div>
             </div>
-            
+
             <button
               onClick={() => navigateDate('next')}
-              class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              class="p-2 text-gray-300 hover:text-gray-200 hover:bg-slate-800 rounded-lg transition-colors"
             >
               <ChevronRightIcon />
             </button>
@@ -644,7 +641,7 @@ const AppointmentCalendar: Component<AppointmentCalendarProps> = (props) => {
           {/* Today Button */}
           <button
             onClick={() => setCurrentDate(new Date())}
-            class="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+            class="px-4 py-2 text-sm font-medium text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
           >
             Today
           </button>
@@ -683,22 +680,22 @@ const AppointmentCalendar: Component<AppointmentCalendarProps> = (props) => {
 
       {/* Quick Stats */}
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="rounded-lg shadow-sm border border-gray-200 p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">Today's Appointments</p>
-              <p class="text-2xl font-bold text-gray-900">
+              <p class="text-sm font-medium text-gray-200">Today's Appointments</p>
+              <p class="text-2xl font-bold text-gray-100">
                 {appointments().filter(apt => apt.date === new Date().toISOString().split('T')[0]).length}
               </p>
             </div>
             <CalendarIcon />
           </div>
         </div>
-        
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+
+        <div class="rounded-lg shadow-sm border border-gray-200 p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">Pending</p>
+              <p class="text-sm font-medium text-gray-200">Pending</p>
               <p class="text-2xl font-bold text-yellow-600">
                 {appointments().filter(apt => apt.status === 'scheduled').length}
               </p>
@@ -706,11 +703,11 @@ const AppointmentCalendar: Component<AppointmentCalendarProps> = (props) => {
             <ClockIcon />
           </div>
         </div>
-        
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+
+        <div class="rounded-lg shadow-sm border border-gray-200 p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">In Progress</p>
+              <p class="text-sm font-medium text-gray-200">In Progress</p>
               <p class="text-2xl font-bold text-blue-600">
                 {appointments().filter(apt => apt.status === 'in-progress').length}
               </p>
@@ -718,11 +715,11 @@ const AppointmentCalendar: Component<AppointmentCalendarProps> = (props) => {
             <ClockIcon />
           </div>
         </div>
-        
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+
+        <div class="rounded-lg shadow-sm border border-gray-200 p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">Completed</p>
+              <p class="text-sm font-medium text-gray-200">Completed</p>
               <p class="text-2xl font-bold text-green-600">
                 {appointments().filter(apt => apt.status === 'completed').length}
               </p>

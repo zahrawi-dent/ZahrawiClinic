@@ -1,17 +1,21 @@
-import { 
-  type Component, 
-  createSignal, 
-  createMemo, 
-  Show, 
-  For, 
-  onMount,
-  onCleanup 
+import { createFileRoute } from '@tanstack/solid-router'
+import {
+  type Component,
+  createSignal,
+  createMemo,
+  Show,
 } from 'solid-js';
 import { createForm } from '@tanstack/solid-form';
 import { useNavigate, useParams } from '@tanstack/solid-router';
 import { Collections } from '../../types/pocketbase-types';
 import { useDetailQuery, useUpdateMutation, useDeleteMutation } from '../../data';
 import { useRealtimeRecordSubscription } from '../../optimistic/optimistic-hooks';
+
+export const Route = createFileRoute('/appointments/$appointmentId')({
+  component: AppointmentDetailPage,
+})
+
+
 
 // ===== ICONS =====
 const ArrowLeftIcon = () => (
@@ -127,16 +131,16 @@ const getStatusLabel = (status: string) => {
 };
 
 // ===== COMPONENTS =====
-const InfoCard = (props: { 
-  title: string; 
-  children: any; 
+const InfoCard = (props: {
+  title: string;
+  children: any;
   icon?: Component;
   class?: string;
 }) => (
-  <div class={`bg-white rounded-lg shadow-sm border border-gray-200 p-6 ${props.class || ''}`}>
+  <div class={`rounded-lg shadow-sm border border-gray-200 p-6 ${props.class || ''}`}>
     <div class="flex items-center gap-3 mb-4">
       {props.icon && <props.icon />}
-      <h3 class="text-lg font-semibold text-gray-900">{props.title}</h3>
+      <h3 class="text-lg font-semibold text-gray-100">{props.title}</h3>
     </div>
     {props.children}
   </div>
@@ -144,14 +148,14 @@ const InfoCard = (props: {
 
 const InfoRow = (props: { label: string; value: string | number; class?: string }) => (
   <div class={`flex items-center justify-between py-2 ${props.class || ''}`}>
-    <span class="text-sm font-medium text-gray-600">{props.label}</span>
-    <span class="text-sm text-gray-900">{props.value}</span>
+    <span class="text-sm font-medium text-gray-200">{props.label}</span>
+    <span class="text-sm text-gray-100">{props.value}</span>
   </div>
 );
 
-const EditForm = (props: { 
-  appointment: any; 
-  onSave: (data: any) => void; 
+const EditForm = (props: {
+  appointment: any;
+  onSave: (data: any) => void;
   onCancel: () => void;
   isLoading: boolean;
 }) => {
@@ -178,7 +182,7 @@ const EditForm = (props: {
     >
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+          <label class="block text-sm font-medium text-gray-200 mb-1">Start Time</label>
           <form.Field name="start_time" validators={{ onChange: ({ value }) => (!value ? 'Start time is required' : undefined) }}>
             {(field) => (
               <input
@@ -192,9 +196,9 @@ const EditForm = (props: {
             )}
           </form.Field>
         </div>
-        
+
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+          <label class="block text-sm font-medium text-gray-200 mb-1">End Time</label>
           <form.Field name="end_time">
             {(field) => (
               <input
@@ -210,7 +214,7 @@ const EditForm = (props: {
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+        <label class="block text-sm font-medium text-gray-200 mb-1">Reason</label>
         <form.Field name="reason">
           {(field) => (
             <input
@@ -225,7 +229,7 @@ const EditForm = (props: {
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+        <label class="block text-sm font-medium text-gray-200 mb-1">Status</label>
         <form.Field name="status">
           {(field) => (
             <select
@@ -246,7 +250,7 @@ const EditForm = (props: {
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+        <label class="block text-sm font-medium text-gray-200 mb-1">Notes</label>
         <form.Field name="notes">
           {(field) => (
             <textarea
@@ -269,7 +273,7 @@ const EditForm = (props: {
           <SaveIcon />
           <span>{props.isLoading ? 'Saving...' : 'Save Changes'}</span>
         </button>
-        
+
         <button
           type="button"
           onClick={props.onCancel}
@@ -285,10 +289,9 @@ const EditForm = (props: {
 };
 
 // ===== MAIN COMPONENT =====
-const AppointmentDetailPage: Component = () => {
+function AppointmentDetailPage() {
   const navigate = useNavigate();
-  const params = useParams({ from: '/appointments/$id' });
-  const appointmentId = () => params().id;
+  const appointmentId = () => Route.useParams()().appointmentId
 
   const [isEditing, setIsEditing] = createSignal(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = createSignal(false);
@@ -344,12 +347,12 @@ const AppointmentDetailPage: Component = () => {
   };
 
   return (
-    <div class="min-h-screen bg-gray-50 p-6">
+    <div class="min-h-screen p-6">
       {/* Header */}
       <div class="mb-6">
         <button
           onClick={() => navigate({ to: '/appointments' })}
-          class="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+          class="flex items-center gap-2 text-gray-300 hover:text-gray-100 mb-4 transition-colors"
         >
           <ArrowLeftIcon />
           <span>Back to Appointments</span>
@@ -357,8 +360,8 @@ const AppointmentDetailPage: Component = () => {
 
         <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-2xl font-bold text-gray-900">Appointment Details</h1>
-            <p class="text-gray-600">View and manage appointment information</p>
+            <h1 class="text-2xl font-bold text-gray-200">Appointment Details</h1>
+            <p class="text-gray-200">View and manage appointment information</p>
           </div>
 
           <div class="flex items-center gap-3">
@@ -385,7 +388,7 @@ const AppointmentDetailPage: Component = () => {
 
       <Show when={appointmentQuery.isLoading}>
         <div class="flex items-center justify-center h-64">
-          <div class="text-lg text-gray-600">Loading appointment...</div>
+          <div class="text-lg text-gray-200">Loading appointment...</div>
         </div>
       </Show>
 
@@ -470,18 +473,18 @@ const AppointmentDetailPage: Component = () => {
             <InfoCard title="Quick Actions">
               <div class="space-y-3">
                 <button class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                  <div class="font-medium text-gray-900">Reschedule</div>
-                  <div class="text-sm text-gray-600">Change appointment time</div>
+                  <div class="font-medium text-gray-100">Reschedule</div>
+                  <div class="text-sm text-gray-200">Change appointment time</div>
                 </button>
 
                 <button class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                  <div class="font-medium text-gray-900">Send Reminder</div>
-                  <div class="text-sm text-gray-600">Send SMS/Email reminder</div>
+                  <div class="font-medium text-gray-100">Send Reminder</div>
+                  <div class="text-sm text-gray-200">Send SMS/Email reminder</div>
                 </button>
 
                 <button class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                  <div class="font-medium text-gray-900">View History</div>
-                  <div class="text-sm text-gray-600">Patient appointment history</div>
+                  <div class="font-medium text-gray-100">View History</div>
+                  <div class="text-sm text-gray-200">Patient appointment history</div>
                 </button>
               </div>
             </InfoCard>
@@ -493,13 +496,13 @@ const AppointmentDetailPage: Component = () => {
       <Show when={showDeleteConfirm()}>
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div class="absolute inset-0 bg-black/40" aria-hidden="true"></div>
-          <div class="relative w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+          <div class="relative w-full max-w-md rounded-lg bg-slate-800 p-6 shadow-xl">
             <div class="text-center">
               <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 mb-4">
                 <TrashIcon />
               </div>
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">Delete Appointment</h3>
-              <p class="text-gray-600 mb-6">
+              <h3 class="text-lg font-semibold text-gray-100 mb-2">Delete Appointment</h3>
+              <p class="text-gray-300 mb-6">
                 Are you sure you want to delete this appointment? This action cannot be undone.
               </p>
 
@@ -525,5 +528,3 @@ const AppointmentDetailPage: Component = () => {
     </div>
   );
 };
-
-export default AppointmentDetailPage;

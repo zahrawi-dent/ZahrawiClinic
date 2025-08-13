@@ -4,13 +4,13 @@ import { Sidebar, defaultNavItems } from '../Sidebar';
 import { useAuth } from '../../auth/AuthContext';
 
 
-const AppSidebar: Component = () => {
+export const AppSidebar: Component = () => {
   const { authState } = useAuth();
-  
+
   const userProfile = createMemo(() => {
     const auth = authState();
     if (!auth.user) return undefined;
-    
+
     return {
       name: auth.user.name || auth.user.email,
       email: auth.user.email,
@@ -21,8 +21,8 @@ const AppSidebar: Component = () => {
 
   return (
     <div class="flex flex-col h-full">
-      <Sidebar 
-        items={defaultNavItems} 
+      <Sidebar
+        items={defaultNavItems}
         userProfile={userProfile()}
       />
     </div>

@@ -1,5 +1,5 @@
-import type { Component } from 'solid-js';
-import { For, Show, createSignal, createMemo } from 'solid-js';
+import { createFileRoute } from '@tanstack/solid-router'
+import { Show, createSignal, createMemo } from 'solid-js';
 import { createForm } from '@tanstack/solid-form';
 import { Collections } from '../../types/pocketbase-types';
 import type { AppointmentsResponse } from '../../types/pocketbase-types';
@@ -7,11 +7,17 @@ import { useListQuery, useCreateMutation, useDeleteMutation } from '../../data';
 import { useRealtimeSubscription } from '../../optimistic/optimistic-hooks';
 import AppointmentCalendar from '../../components/AppointmentCalendar';
 
-const AppointmentsPage: Component = () => {
+export const Route = createFileRoute('/appointments/')({
+  component: AppointmentsPage,
+})
+
+
+
+function AppointmentsPage() {
   const collection = Collections.Appointments;
   const apptsQuery = useListQuery(collection, { perPage: 50, sort: 'start_time' });
   const createAppt = useCreateMutation(collection);
-  const deleteAppt = useDeleteMutation(collection);
+  // const deleteAppt = useDeleteMutation(collection);
   const [formOpen, setFormOpen] = createSignal(false);
   const form = createForm(() => ({
     defaultValues: {
@@ -82,13 +88,13 @@ const AppointmentsPage: Component = () => {
   };
 
   return (
-    <div class="min-h-screen bg-gray-50 p-6">
+    <div class="min-h-screen p-6">
       <Show when={apptsQuery.isLoading}>
         <div class="flex items-center justify-center h-64">
-          <div class="text-lg text-gray-600">Loading appointments…</div>
+          <div class="text-lg text-gray-200">Loading appointments…</div>
         </div>
       </Show>
-      
+
       <Show when={apptsQuery.isError}>
         <div class="flex items-center justify-center h-64">
           <div class="text-lg text-red-600">Failed to load appointments</div>

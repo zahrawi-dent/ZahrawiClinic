@@ -1,9 +1,15 @@
-import type { Component } from 'solid-js';
+import { createFileRoute } from '@tanstack/solid-router'
 import { For, Show, createSignal, createMemo } from 'solid-js';
 import { useNavigate } from '@tanstack/solid-router';
 import { Collections } from '../../types/pocketbase-types';
 import { useListQuery, useDeleteMutation } from '../../data';
 import { useRealtimeSubscription } from '../../optimistic/optimistic-hooks';
+
+export const Route = createFileRoute('/patients/')({
+  component: PatientsListPage,
+})
+
+
 
 const SearchIcon = () => (
   <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -17,7 +23,7 @@ const PlusIcon = () => (
   </svg>
 );
 
-const PatientsListPage: Component = () => {
+function PatientsListPage() {
   const navigate = useNavigate();
   const collection = Collections.Patients;
   const patientsQuery = useListQuery(collection, { perPage: 50, sort: 'last_name,first_name' });
@@ -91,13 +97,13 @@ const PatientsListPage: Component = () => {
   const femaleCount = createMemo(() => (patientsQuery.data?.items || []).filter(p => p.sex === 'female').length);
 
   return (
-    <div class="min-h-screen bg-gray-50 p-6 space-y-6">
+    <div class="min-h-screen p-6 space-y-6">
       {/* Hero Header */}
       <div class="flex flex-col gap-5">
         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-900">Patients</h2>
-            <p class="text-gray-600">Search, filter, and manage your patient directory</p>
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-100">Patients</h2>
+            <p class="text-gray-200">Search, filter, and manage your patient directory</p>
           </div>
           <div class="flex items-center gap-3">
             <div class="relative">
@@ -109,7 +115,7 @@ const PatientsListPage: Component = () => {
                 value={search()}
                 onInput={(e) => setSearch(e.currentTarget.value)}
                 placeholder="Search by name, phone, email"
-                class="w-72 rounded-lg border border-gray-300 bg-white pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-72 rounded-lg border border-gray-300 pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <button
@@ -124,26 +130,26 @@ const PatientsListPage: Component = () => {
 
         {/* Quick Stats */}
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div class="text-sm text-gray-600">Total patients</div>
-            <div class="mt-1 text-2xl font-bold text-gray-900">{patientsQuery.data?.totalItems ?? 0}</div>
+          <div class="rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="text-sm text-gray-200">Total patients</div>
+            <div class="mt-1 text-2xl font-bold text-gray-100">{patientsQuery.data?.totalItems ?? 0}</div>
           </div>
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div class="text-sm text-gray-600">Male</div>
+          <div class="rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="text-sm text-gray-200">Male</div>
             <div class="mt-1 text-2xl font-bold text-blue-600">{maleCount()}</div>
           </div>
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div class="text-sm text-gray-600">Female</div>
+          <div class="rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="text-sm text-gray-100">Female</div>
             <div class="mt-1 text-2xl font-bold text-pink-600">{femaleCount()}</div>
           </div>
         </div>
       </div>
 
       {/* Controls */}
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div class="rounded-lg shadow-sm border border-gray-200 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div class="flex items-center gap-2">
           <button
-            class={`px-3 py-1.5 rounded-full text-sm ${sexFilter() === 'all' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+            class={`px-3 py-1.5 rounded-full text-sm ${sexFilter() === 'all' ? 'bg-slate-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
             onClick={() => setSexFilter('all')}
           >All</button>
           <button
@@ -159,7 +165,7 @@ const PatientsListPage: Component = () => {
           <select
             value={sortBy()}
             onInput={(e) => setSortBy(e.currentTarget.value as any)}
-            class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="name_asc">Name A → Z</option>
             <option value="name_desc">Name Z → A</option>
@@ -182,7 +188,7 @@ const PatientsListPage: Component = () => {
       {/* Content */}
       <Show when={patientsQuery.isLoading}>
         <div class="flex items-center justify-center h-64">
-          <div class="text-lg text-gray-600">Loading patients…</div>
+          <div class="text-lg text-gray-200">Loading patients…</div>
         </div>
       </Show>
 
@@ -194,16 +200,16 @@ const PatientsListPage: Component = () => {
 
       <Show when={patientsQuery.data}>
         <Show when={view() === 'table'}>
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div class="rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-              <div class="text-sm text-gray-600">
+              <div class="text-sm text-gray-200">
                 Showing {filteredPatients().length} of {patientsQuery.data!.totalItems} patients
               </div>
             </div>
 
             <div class="overflow-x-auto">
               <table class="min-w-full text-sm">
-                <thead class="bg-gray-50 text-gray-700">
+                <thead class="text-gray-200">
                   <tr>
                     <th class="text-left px-4 py-2 font-medium">Patient</th>
                     <th class="text-left px-4 py-2 font-medium">Phone</th>
@@ -217,7 +223,7 @@ const PatientsListPage: Component = () => {
                 <tbody>
                   <For each={filteredPatients()} fallback={<tr><td class="px-4 py-3">No patients</td></tr>}>
                     {(p) => (
-                      <tr class="border-t hover:bg-gray-50">
+                      <tr class="border-t hover:bg-slate-800">
                         <td class="px-4 py-3">
                           <div class="flex items-center gap-3">
                             <div class="h-9 w-9 rounded-full bg-gray-100 flex items-center justify-center text-xs font-semibold text-gray-700">

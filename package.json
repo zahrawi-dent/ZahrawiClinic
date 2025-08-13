@@ -16,6 +16,7 @@
   "devDependencies": {
     "@eslint/js": "^9.33.0",
     "@eslint/json": "^0.13.1",
+    "@tanstack/router-plugin": "^1.131.8",
     "eslint": "^9.33.0",
     "globals": "^16.3.0",
     "jiti": "^2.5.1",
@@ -25,6 +26,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
     "@tanstack/solid-router": "^1.131.2",
+    "@tanstack/solid-router-devtools": "^1.131.8",
     "tailwindcss": "^4.1.11"
   }
 }

@@ -1,9 +1,15 @@
+import { createFileRoute } from '@tanstack/solid-router'
 import type { Component } from 'solid-js';
 import { createSignal, Show } from 'solid-js';
 import { useAuth } from '../../auth/AuthContext';
 import { Link, useRouter } from '@tanstack/solid-router';
 
-const SignupPage: Component = () => {
+export const Route = createFileRoute('/(auth)/signup')({
+  component: SignupPage,
+})
+
+
+function SignupPage() {
   const { register, authState, clearError } = useAuth();
   const router = useRouter();
   const [name, setName] = createSignal('');
@@ -18,15 +24,15 @@ const SignupPage: Component = () => {
     setIsSubmitting(true);
     try {
       await register({ email: email(), password: password(), passwordConfirm: passwordConfirm(), name: name() });
-      router.navigate({ to: '/dashboard' });
+      router.navigate({ to: '/' });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div class="w-full max-w-md bg-white rounded-lg shadow p-6">
+    <div class="min-h-screen flex items-center justify-center bg-slate-900 p-4">
+      <div class="w-full max-w-md rounded-lg shadow p-6">
         <h1 class="text-2xl font-semibold mb-1">Create account</h1>
         <p class="text-sm text-gray-600 mb-6">Join Zahrawi Clinic to manage patients and appointments.</p>
 
