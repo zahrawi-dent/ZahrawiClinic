@@ -5,9 +5,12 @@ import { Collections } from '../../types/pocketbase-types';
 import { useListQuery, useDeleteMutation } from '../../data';
 import { useRealtimeSubscription } from '../../optimistic/optimistic-hooks';
 
+
+
 export const Route = createFileRoute('/patients/')({
   component: PatientsListPage,
 })
+
 
 
 

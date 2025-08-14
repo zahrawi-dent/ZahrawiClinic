@@ -9,12 +9,20 @@ import './index.css'
 
 import { render } from 'solid-js/web'
 import { RouterProvider, createRouter } from '@tanstack/solid-router'
+import { Suspense } from 'solid-js'
+import RouteLoading from './components/RouteLoading'
 
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
 
-// Create a new router instance
-const router = createRouter({ routeTree })
+// Create a new router instance with loading configuration
+const router = createRouter({ 
+  routeTree,
+  defaultPreload: 'intent',
+  defaultPreloadDelay: 0,
+  defaultPreloadStaleTime: 0,
+  defaultPendingComponent: () => <RouteLoading />,
+})
 
 // Register the router instance for type safety
 declare module '@tanstack/solid-router' {
@@ -26,5 +34,9 @@ declare module '@tanstack/solid-router' {
 // Render the app
 const rootElement = document.getElementById('root')!
 if (!rootElement.innerHTML) {
-  render(() => <RouterProvider router={router} />, rootElement)
+  render(() => (
+    <Suspense fallback={<RouteLoading />}>
+      <RouterProvider router={router} />
+    </Suspense>
+  ), rootElement)
 }

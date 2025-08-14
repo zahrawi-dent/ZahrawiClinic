@@ -1,5 +1,4 @@
-import { Show, type Component, createMemo } from 'solid-js';
-import { Outlet } from '@tanstack/solid-router';
+import { type Component, createMemo } from 'solid-js';
 import { Sidebar, defaultNavItems } from '../Sidebar';
 import { useAuth } from '../../auth/AuthContext';
 
@@ -29,20 +28,20 @@ export const AppSidebar: Component = () => {
   );
 };
 
-const AppLayout: Component = () => {
-  return (
-    <div class="bg-slate-900 flex min-h-screen flex-col text-white">
-      <div class="flex flex-grow flex-col lg:flex-row">
-        <AppSidebar />
-        <main class="px-4 py-6 pt-16 lg:flex-1 lg:px-8">
-          <Outlet />
-        </main>
-      </div>
-    </div>
-  );
-};
-
-export default AppLayout;
+// const AppLayout: Component = () => {
+//   return (
+//     <div class="flex min-h-screen flex-col text-white">
+//       <div class="flex flex-grow flex-col lg:flex-row">
+//         <AppSidebar />
+//         <main class="px-4 py-6 pt-16 lg:flex-1 lg:px-8">
+//           <Outlet />
+//         </main>
+//       </div>
+//     </div>
+//   );
+// };
+//
+// export default AppLayout;
 
 // appLayout
 

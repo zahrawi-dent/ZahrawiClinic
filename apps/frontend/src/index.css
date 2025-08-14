@@ -1,1 +1,35 @@
 @import "tailwindcss";
+
+/* Smooth transitions for route changes */
+.route-transition-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.route-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 200ms ease-in-out, transform 200ms ease-in-out;
+}
+
+.route-transition-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.route-transition-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 200ms ease-in-out, transform 200ms ease-in-out;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
