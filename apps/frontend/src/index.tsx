@@ -15,14 +15,8 @@ import RouteLoading from './components/RouteLoading'
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
 
-// Create a new router instance with loading configuration
-const router = createRouter({ 
-  routeTree,
-  defaultPreload: 'intent',
-  defaultPreloadDelay: 0,
-  defaultPreloadStaleTime: 0,
-  defaultPendingComponent: () => <RouteLoading />,
-})
+// Create a new router instance
+const router = createRouter({ routeTree })
 
 // Register the router instance for type safety
 declare module '@tanstack/solid-router' {
