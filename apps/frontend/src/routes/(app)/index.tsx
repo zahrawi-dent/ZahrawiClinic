@@ -246,7 +246,7 @@ const mockPatients: Patient[] = [
 const ReceptionistDashboard = () => {
   const navigate = useNavigate();
 
-  const quickActions = [
+  const quickActions: Array<{ title: string; description: string; icon: Component; onClick: () => void }> = [
     {
       title: 'New Appointment',
       description: 'Schedule a new patient appointment',
@@ -351,19 +351,14 @@ const ReceptionistDashboard = () => {
 const DentistDashboard = () => {
   const navigate = useNavigate();
 
-  const quickActions = [
+  const quickActions: Array<{ title: string; description: string; icon: Component; onClick: () => void }> = [
     {
       title: 'Patient Records',
       description: 'Access patient treatment history',
       icon: UsersIcon,
       onClick: () => navigate({ to: '/patients' })
     },
-    {
-      title: 'Treatment Plans',
-      description: 'Create and manage treatment plans',
-      icon: CheckCircleIcon,
-      onClick: () => navigate({ to: '/treatments' })
-    },
+    // Placeholder for future route
     {
       title: 'Schedule',
       description: 'View your appointment schedule',
@@ -456,7 +451,7 @@ const DentistDashboard = () => {
 const AdministratorDashboard = () => {
   const navigate = useNavigate();
 
-  const quickActions = [
+  const quickActions: Array<{ title: string; description: string; icon: Component; onClick: () => void }> = [
     // Removed links to non-existent admin routes to satisfy type constraints
   ];
 
@@ -555,7 +550,7 @@ const AdministratorDashboard = () => {
 const ManagerDashboard = () => {
   const navigate = useNavigate();
 
-  const quickActions = [
+  const quickActions: Array<{ title: string; description: string; icon: Component; onClick: () => void }> = [
     // Removed links to non-existent admin report routes to satisfy type constraints
   ];
 

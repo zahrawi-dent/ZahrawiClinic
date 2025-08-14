@@ -1,6 +1,6 @@
 import { createContext, useContext, type ParentComponent, onMount } from 'solid-js';
 import { useQueryClient } from '@tanstack/solid-query';
-import { pb } from '../lib/pocketbase';
+import { auth as authLayer } from '../data/auth';
 import { authStore } from './auth-store';
 import type { AuthContextValue, LoginCredentials, RegisterData } from './auth-types';
 
@@ -46,19 +46,12 @@ export const AuthProvider: ParentComponent = (props) => {
         throw new Error('Password is required');
       }
 
-      const authData = await pb.collection('users').authWithPassword(
-        credentials.email.toLowerCase().trim(),
-        credentials.password
-      );
-
-      if (!authData.record) {
-        throw new Error('Login failed: No user data received');
-      }
+      await authLayer.login(credentials.email.toLowerCase().trim(), credentials.password);
 
       // Invalidate all queries to refresh data with new auth context
       queryClient.invalidateQueries();
 
-      console.log('Login successful:', authData.record.email);
+      console.log('Login successful');
     } catch (error) {
       const message = error instanceof Error
         ? error.message
@@ -85,17 +78,10 @@ export const AuthProvider: ParentComponent = (props) => {
         throw new Error('Password is required');
       }
 
-      const authData = await pb.collection('_superusers').authWithPassword(
-        email.toLowerCase().trim(),
-        password
-      );
-
-      if (!authData.record) {
-        throw new Error('Admin login failed: No user data received');
-      }
+      await authLayer.loginAsAdmin(email.toLowerCase().trim(), password);
 
       queryClient.invalidateQueries();
-      console.log('Admin login successful:', authData.record.email);
+      console.log('Admin login successful');
     } catch (error) {
       const message = error instanceof Error
         ? error.message
@@ -140,17 +126,10 @@ export const AuthProvider: ParentComponent = (props) => {
         name: data.name?.trim() || '',
       };
 
-      const user = await pb.collection('users').create(userData);
-
-      if (!user) {
-        throw new Error('Registration failed: User creation unsuccessful');
-      }
-
-      // Auto-login after successful registration
-      await pb.collection('users').authWithPassword(userData.email, userData.password);
+      await authLayer.register(userData.email, userData.password, userData.name);
 
       queryClient.invalidateQueries();
-      console.log('Registration and login successful:', user.email);
+      console.log('Registration and login successful');
     } catch (error) {
       const message = error instanceof Error
         ? error.message
@@ -168,8 +147,7 @@ export const AuthProvider: ParentComponent = (props) => {
     try {
       setLoading(true);
 
-      // Clear PocketBase auth
-      pb.authStore.clear();
+      await authLayer.logout();
 
       // Clear all cached data
       queryClient.clear();
@@ -185,14 +163,8 @@ export const AuthProvider: ParentComponent = (props) => {
 
   const refreshAuth = async (): Promise<void> => {
     try {
-      if (!pb.authStore.isValid || !pb.authStore.token) {
-        return;
-      }
-
       setLoading(true);
-
-      // Refresh the auth token
-      await pb.collection('users').authRefresh();
+      await authLayer.refreshAuth();
 
       console.log('Auth token refreshed');
     } catch (error) {

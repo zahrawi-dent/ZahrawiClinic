@@ -1,6 +1,6 @@
 // lib/auth-store.ts
 import { createStore } from 'solid-js/store';
-import { pb } from '../lib/pocketbase';
+import { auth as authLayer } from '../data/auth';
 import type { AuthState, AuthUser } from './auth-types';
 
 class AuthError extends Error {
@@ -24,44 +24,19 @@ function createAuthStore() {
     role: null,
   });
 
-  // Initialize from PocketBase auth store
+  // Initialize from auth data-layer snapshot
   const initializeAuth = () => {
     try {
-      const isValid = pb.authStore.isValid;
-      const record = pb.authStore.record;
-
-      if (isValid && record) {
-        const user: AuthUser = {
-          id: record.id,
-          email: record.email,
-          name: record.name,
-          avatar: record.avatar,
-          verified: record.verified || false,
-          created: record.created,
-          updated: record.updated,
-        };
-
-        // Determine role based on collection
-        const role = pb.authStore.token && pb.authStore.record?.collectionName === '_superusers'
-          ? 'admin' as const
-          : 'user' as const;
+      const { user, role } = authLayer.getSnapshot();
 
         setAuthState({
-          user,
-          isAuthenticated: true,
+          user: user,
+          isAuthenticated: !!user,
           isLoading: false,
           error: null,
-          role,
+          role: role,
         });
-      } else {
-        setAuthState({
-          user: null,
-          isAuthenticated: false,
-          isLoading: false,
-          error: null,
-          role: null,
-        });
-      }
+      
     } catch (error) {
       console.error('Failed to initialize auth:', error);
       setAuthState({
@@ -74,9 +49,9 @@ function createAuthStore() {
     }
   };
 
-  // Listen to PocketBase auth changes
-  pb.authStore.onChange((token, model) => {
-    console.log('Auth store changed:', { hasToken: !!token, hasModel: !!model });
+  // Listen to auth data-layer changes
+  authLayer.subscribe(() => {
+    console.log('Auth state changed via data-layer');
     initializeAuth();
   });
 
