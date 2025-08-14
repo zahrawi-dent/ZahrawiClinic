@@ -251,6 +251,11 @@ export function useRealtimeSubscription(collection: Collections) {
   };
 }
 
+// Record-level realtime subscription (mock)
+export function useRealtimeRecordSubscription(_collection: Collections, _id: string | undefined) {
+  // no-op in demo mode
+}
+
 // Mock optimistic state hook
 export function useOptimisticState() {
   return {
@@ -260,6 +265,11 @@ export function useOptimisticState() {
     hasPendingOperations: () => false,
     getPendingForCollection: () => [],
   };
+}
+
+// Debugger placeholder (mock)
+export function OptimisticDebugger() {
+  return null as any;
 }
 
 // Utility functions for seeding demo data

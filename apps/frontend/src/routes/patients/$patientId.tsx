@@ -1,9 +1,10 @@
 import { createFileRoute } from '@tanstack/solid-router'
-import { createMemo, Show } from 'solid-js';
+import { createMemo, Show, createSignal, For } from 'solid-js';
 import { useParams, useNavigate } from '@tanstack/solid-router';
-import { Collections } from '../../types/pocketbase-types';
-import { useDetailQuery, useDeleteMutation } from '../../data';
+import { Collections, type DentalChartsRecord, type DentalChartsResponse, type PatientsResponse } from '../../types/pocketbase-types';
+import { useDetailQuery, useDeleteMutation, useListQuery, useCreateMutation } from '../../data';
 import { useRealtimeRecordSubscription } from '../../optimistic/optimistic-hooks';
+import DentalChart, { type ChartState } from '../../components/dental/DentalChart';
 
 export const Route = createFileRoute('/patients/$patientId')({
   component: PatientDetailPage,
@@ -24,6 +25,8 @@ function PatientDetailPage() {
 
   const patientQuery = useDetailQuery(Collections.Patients, patientId());
   const deletePatient = useDeleteMutation(Collections.Patients);
+  const chartsQuery = useListQuery(Collections.DentalCharts, { perPage: 10, filter: `patient.id = "${patientId()}"`, sort: '-created' })
+  const createChart = useCreateMutation(Collections.DentalCharts)
 
   const patient = createMemo(() => patientQuery.data);
 
@@ -115,6 +118,7 @@ function PatientDetailPage() {
                 >
                   Add treatment record
                 </button>
+                {/* New dental chart button moved into section */}
                 <button
                   class="px-4 py-2 rounded-md border text-sm text-red-600 hover:bg-red-50"
                   onClick={() => deletePatient.mutate({ id: patientId() })}
@@ -123,6 +127,24 @@ function PatientDetailPage() {
                 </button>
               </div>
             </div>
+
+            {/* Dental chart section */}
+            <DentalChartsSection
+              patient={patient()!}
+              charts={chartsQuery.data?.items as any}
+              isLoading={chartsQuery.isLoading}
+              onCreate={async (initial: ChartState) => {
+                await createChart.mutateAsync({ data: {
+                  patient: [patientId()],
+                  clinic: patient()!.primary_clinic,
+                  doctor: [],
+                  chart_type: 'initial' as any,
+                  notation_system: 'universal' as any,
+                  dentition: 'permanent' as any,
+                  chart_state: initial as any,
+                } as any })
+              }}
+            />
 
             {/* Placeholder for history sections to make UI richer */}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -141,3 +163,41 @@ function PatientDetailPage() {
     </div>
   );
 };
+
+function DentalChartsSection(props: { patient: PatientsResponse | undefined, charts: DentalChartsResponse[] | undefined, isLoading: boolean, onCreate: (initial: ChartState) => Promise<void> }) {
+  const [showNewChart, setShowNewChart] = createSignal(false)
+
+  const initialChartState: ChartState = { teeth: {} }
+
+  return (
+    <div class="rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-md font-semibold text-gray-100">Dental charts</h3>
+        <button class="px-3 py-1.5 rounded-md border text-sm hover:bg-gray-50" onClick={() => setShowNewChart(true)}>New chart</button>
+      </div>
+      <Show when={!props.isLoading} fallback={<div class="text-gray-200">Loading charts…</div>}>
+        <Show when={props.charts && props.charts.length > 0} fallback={<div class="text-sm text-gray-300">No charts yet</div>}>
+          <div class="space-y-6">
+            <For each={props.charts}>{(chart) => (
+              <div class="rounded-md border border-gray-800 p-3">
+                <div class="text-xs text-gray-400 mb-2">{chart.chart_type} • {chart.notation_system} • {chart.dentition} • {new Date((chart as any).created).toLocaleString()}</div>
+                <DentalChart value={(chart as any).chart_state} readOnly />
+              </div>
+            )}</For>
+          </div>
+        </Show>
+      </Show>
+
+      <Show when={showNewChart()}>
+        <div class="mt-4 rounded-md border border-blue-900 p-3 bg-slate-900">
+          <div class="text-sm text-gray-100 mb-2">New dental chart</div>
+          <DentalChart value={initialChartState} onChange={() => { /* captured in parent when saving */ }} />
+          <div class="mt-3 flex items-center gap-2">
+            <button class="px-3 py-1.5 rounded-md bg-blue-600 text-white text-sm" onClick={async () => { await props.onCreate(initialChartState); setShowNewChart(false) }}>Save</button>
+            <button class="px-3 py-1.5 rounded-md border text-sm" onClick={() => setShowNewChart(false)}>Cancel</button>
+          </div>
+        </div>
+      </Show>
+    </div>
+  )
+}

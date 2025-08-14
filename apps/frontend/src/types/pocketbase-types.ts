@@ -12,6 +12,7 @@ export enum Collections {
   Otps = "_otps",
   Superusers = "_superusers",
   Appointments = "appointments",
+  DentalCharts = "dental_charts",
   Clinics = "clinics",
   Organizations = "organizations",
   PatientTransfers = "patient_transfers",
@@ -122,6 +123,37 @@ export type AppointmentsRecord = {
   status: AppointmentsStatusOptions
 }
 
+export enum DentalChartsChart_typeOptions {
+  "initial" = "initial",
+  "progress" = "progress",
+  "recall" = "recall",
+  "pre_op" = "pre_op",
+  "post_op" = "post_op",
+}
+export enum DentalChartsNotation_systemOptions {
+  "universal" = "universal",
+  "fdi" = "fdi",
+  "palmer" = "palmer",
+}
+export enum DentalChartsDentitionOptions {
+  "permanent" = "permanent",
+  "primary" = "primary",
+  "mixed" = "mixed",
+}
+export type DentalChartsRecord<Tchart_state = unknown> = {
+  appointment?: RecordIdString[]
+  chart_state: Tchart_state
+  chart_type: DentalChartsChart_typeOptions
+  clinic: RecordIdString[]
+  dentition: DentalChartsDentitionOptions
+  doctor: RecordIdString[]
+  id: string
+  images?: string[]
+  notation_system: DentalChartsNotation_systemOptions
+  notes?: string
+  patient: RecordIdString[]
+}
+
 export type ClinicsRecord = {
   address: string
   clinic_name: string
@@ -218,6 +250,7 @@ export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemF
 export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemFields<Texpand>
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
 export type AppointmentsResponse<Texpand = unknown> = Required<AppointmentsRecord> & BaseSystemFields<Texpand>
+export type DentalChartsResponse<Tchart_state = unknown, Texpand = unknown> = Required<DentalChartsRecord<Tchart_state>> & BaseSystemFields<Texpand>
 export type ClinicsResponse<Texpand = unknown> = Required<ClinicsRecord> & BaseSystemFields<Texpand>
 export type OrganizationsResponse<Texpand = unknown> = Required<OrganizationsRecord> & BaseSystemFields<Texpand>
 export type PatientTransfersResponse<Texpand = unknown> = Required<PatientTransfersRecord> & BaseSystemFields<Texpand>
@@ -236,6 +269,7 @@ export type CollectionRecords = {
   _otps: OtpsRecord
   _superusers: SuperusersRecord
   appointments: AppointmentsRecord
+  dental_charts: DentalChartsRecord
   clinics: ClinicsRecord
   organizations: OrganizationsRecord
   patient_transfers: PatientTransfersRecord
@@ -253,6 +287,7 @@ export type CollectionResponses = {
   _otps: OtpsResponse
   _superusers: SuperusersResponse
   appointments: AppointmentsResponse
+  dental_charts: DentalChartsResponse
   clinics: ClinicsResponse
   organizations: OrganizationsResponse
   patient_transfers: PatientTransfersResponse
@@ -273,6 +308,7 @@ export type TypedPocketBase = PocketBase & {
   collection(idOrName: '_otps'): RecordService<OtpsResponse>
   collection(idOrName: '_superusers'): RecordService<SuperusersResponse>
   collection(idOrName: 'appointments'): RecordService<AppointmentsResponse>
+  collection(idOrName: 'dental_charts'): RecordService<DentalChartsResponse>
   collection(idOrName: 'clinics'): RecordService<ClinicsResponse>
   collection(idOrName: 'organizations'): RecordService<OrganizationsResponse>
   collection(idOrName: 'patient_transfers'): RecordService<PatientTransfersResponse>

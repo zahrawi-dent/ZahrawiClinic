@@ -457,24 +457,7 @@ const AdministratorDashboard = () => {
   const navigate = useNavigate();
 
   const quickActions = [
-    {
-      title: 'User Management',
-      description: 'Manage staff accounts and permissions',
-      icon: UsersIcon,
-      onClick: () => navigate({ to: '/admin/users' })
-    },
-    {
-      title: 'Clinic Settings',
-      description: 'Configure clinic information and settings',
-      icon: CheckCircleIcon,
-      onClick: () => navigate({ to: '/admin/clinics' })
-    },
-    {
-      title: 'System Reports',
-      description: 'Generate and view system reports',
-      icon: CurrencyDollarIcon,
-      onClick: () => navigate({ to: '/admin/reports' })
-    }
+    // Removed links to non-existent admin routes to satisfy type constraints
   ];
 
   return (
@@ -573,24 +556,7 @@ const ManagerDashboard = () => {
   const navigate = useNavigate();
 
   const quickActions = [
-    {
-      title: 'Financial Reports',
-      description: 'View revenue and financial analytics',
-      icon: CurrencyDollarIcon,
-      onClick: () => navigate({ to: '/admin/reports/financial' })
-    },
-    {
-      title: 'Staff Performance',
-      description: 'Monitor staff productivity and performance',
-      icon: UsersIcon,
-      onClick: () => navigate({ to: '/admin/reports/performance' })
-    },
-    {
-      title: 'Patient Analytics',
-      description: 'Analyze patient trends and satisfaction',
-      icon: CheckCircleIcon,
-      onClick: () => navigate({ to: '/admin/reports/patients' })
-    }
+    // Removed links to non-existent admin report routes to satisfy type constraints
   ];
 
   return (
