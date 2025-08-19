@@ -1,4 +1,4 @@
-import { createRootRoute, Outlet } from '@tanstack/solid-router'
+import { createRootRoute, Outlet, redirect } from '@tanstack/solid-router'
 import { TanStackRouterDevtools } from '@tanstack/solid-router-devtools'
 import { AppSidebar } from '../components/layout/AppLayout'
 import { pb, PocketBaseContext } from '../lib/pocketbase'
@@ -8,8 +8,20 @@ import { queryClient } from '../lib/queryClient'
 import NotFoundPage from './-NotFoundPage'
 import { Suspense } from 'solid-js'
 import RouteLoading from '../components/RouteLoading'
+import { authStore } from '../auth/auth-store'
 
 export const Route = createRootRoute({
+  beforeLoad: ({ location }) => {
+    const publicPaths = ['/login', '/signup', '/admin-login']
+    if (publicPaths.includes(location.pathname)) {
+      return
+    }
+
+    const { authState } = authStore
+    if (!authState.isAuthenticated) {
+      throw redirect({ to: '/login' })
+    }
+  },
   notFoundComponent: () => NotFoundPage,
   component: () => {
     return (

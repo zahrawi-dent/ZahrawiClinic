@@ -14,6 +14,7 @@ import {
 import { isServer } from "solid-js/web";
 import { useNavigate, useLocation, Link } from "@tanstack/solid-router";
 import SearchModal from "./SearchModal";
+import { useAuth } from "../auth/AuthContext";
 
 // ===== TYPES =====
 export type NavItem = {
@@ -131,9 +132,11 @@ const UserProfileDropdown = (props: {
   collapsed: boolean
 }) => {
   const [isOpen, setIsOpen] = createSignal(false);
+  const { logout } = useAuth();
 
   const handleSignOut = () => {
     // TODO: Implement sign out logic
+    logout();
     console.log('Sign out clicked');
     setIsOpen(false);
   };
@@ -279,9 +282,9 @@ const UserProfileDropdown = (props: {
 const Badge = (props: { children: any; variant?: 'default' | 'success' | 'warning' | 'error' }) => (
   <span
     class={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 text-xs font-medium rounded-full ${props.variant === 'success' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-        props.variant === 'warning' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-          props.variant === 'error' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-            'bg-slate-600/30 text-slate-300 border border-slate-600/50'
+      props.variant === 'warning' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+        props.variant === 'error' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+          'bg-slate-600/30 text-slate-300 border border-slate-600/50'
       }`}
   >
     {props.children}
@@ -322,8 +325,8 @@ const NavItemComponent = (props: {
       <Link
         to={props.item.to}
         class={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${props.isActive
-            ? 'bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-300 shadow-lg shadow-teal-500/10 border border-teal-500/30'
-            : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'
+          ? 'bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-300 shadow-lg shadow-teal-500/10 border border-teal-500/30'
+          : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'
           } ${props.collapsed ? 'justify-center' : ''}`}
         onClick={(e) => {
           toggleExpanded(e);
