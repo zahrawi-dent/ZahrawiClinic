@@ -3,7 +3,7 @@ import type { AuthUser } from '../../auth/auth-types'
 
 export type AuthSnapshot = {
   user: AuthUser | null
-  role: 'receptionist' | 'dentist' | 'administrator' | 'manager' | 'admin' | 'user' | null
+  role: 'receptionist' | 'dentist' | 'manager' | 'admin' | 'user' | null
 }
 
 export async function login(email: string, password: string) {

@@ -48,4 +48,20 @@ export default defineConfig({
       }
     })
   ],
+  build: {
+    // This tells Vite to use terser as the minifier.
+    // This is the default, but it's good to be explicit.
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        // This option specifically tells terser to drop console statements.
+        drop_console: true,
+        // You can also drop other types of logs like debug and info
+        drop_debugger: true,
+      },
+      // Keep in mind that terser also has `format` options
+      // to control things like comments, etc.
+    },
+  },
+
 })

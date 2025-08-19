@@ -1,12 +1,12 @@
 import type { AuthUser } from '../../auth/auth-types'
 
 let currentUser: AuthUser | null = null
-let currentRole: 'receptionist' | 'dentist' | 'administrator' | 'manager' | 'admin' | 'user' | null = null
+let currentRole: 'receptionist' | 'dentist' | 'manager' | 'admin' | 'user' | null = null
 const listeners = new Set<() => void>()
 
 export type AuthSnapshot = {
   user: AuthUser | null
-  role: 'receptionist' | 'dentist' | 'administrator' | 'manager' | 'admin' | 'user' | null
+  role: 'receptionist' | 'dentist' | 'manager' | 'admin' | 'user' | null
 }
 
 export async function login(email: string, _password: string) {

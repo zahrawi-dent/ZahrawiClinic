@@ -51,7 +51,7 @@ export const AuthProvider: ParentComponent = (props) => {
       // Invalidate all queries to refresh data with new auth context
       queryClient.invalidateQueries();
 
-      console.log('Login successful');
+      console.info('Login successful');
     } catch (error) {
       const message = error instanceof Error
         ? error.message
@@ -206,8 +206,8 @@ export const AuthProvider: ParentComponent = (props) => {
   };
 
   return (
-    <AuthContext.Provider value= { contextValue } >
-    { props.children }
+    <AuthContext.Provider value={contextValue} >
+      {props.children}
     </AuthContext.Provider>
   );
 };
