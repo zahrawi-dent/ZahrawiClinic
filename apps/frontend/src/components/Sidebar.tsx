@@ -32,6 +32,7 @@ interface SidebarProps {
   class?: string;
   defaultCollapsed?: boolean;
   userProfile?: {
+    id: string;
     name: string;
     email: string;
     avatar?: string;
@@ -128,7 +129,7 @@ const Kbd = (props: { children: any; class?: string }) => (
 );
 
 const UserProfileDropdown = (props: {
-  userProfile: { name: string; email: string; avatar?: string; role: string };
+  userProfile: { id: string, name: string; email: string; avatar?: string; role: string };
   collapsed: boolean
 }) => {
   const [isOpen, setIsOpen] = createSignal(false);
@@ -184,7 +185,8 @@ const UserProfileDropdown = (props: {
               }
             >
               <img
-                src={props.userProfile.avatar}
+                // TODO: get pocketbase instance instead of hardcoding it
+                src={`http://127.0.0.1:8090/api/files/users/${props.userProfile.id}/${props.userProfile.avatar}`}
                 alt={props.userProfile.name}
                 class="w-10 h-10 rounded-full object-cover"
               />

@@ -37,6 +37,7 @@ export const Route = createRootRoute({
       if (!authState.user) return undefined
       const user = authState.user
       return {
+        id: user.id,
         name: user.name || user.email,
         email: user.email,
         avatar: user.avatar,

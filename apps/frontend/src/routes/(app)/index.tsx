@@ -22,9 +22,6 @@ export const Route = createFileRoute('/(app)/')({
 function Dashboard() {
   const { authState } = useAuth()
   const role = () => authState().role
-  console.log("i'm logging in dev mode")
-  console.info("i'm info in dev mode")
-  console.warn("i'm warn in dev mode")
 
   return (
     <div class="min-h-screen bg-slate-900 p-6">

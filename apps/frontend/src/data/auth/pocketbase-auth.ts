@@ -32,6 +32,7 @@ export async function refreshAuth() {
 export function getSnapshot(): AuthSnapshot {
   const isValid = pb.authStore.isValid
   const record = pb.authStore.record
+  console.log(record)
   if (!isValid || !record) return { user: null, role: null }
   const user: AuthUser = {
     id: record.id,
