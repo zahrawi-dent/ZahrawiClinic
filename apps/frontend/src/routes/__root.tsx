@@ -1,12 +1,12 @@
 import { createRootRoute, Outlet, redirect } from '@tanstack/solid-router'
 import { TanStackRouterDevtools } from '@tanstack/solid-router-devtools'
-import { AppSidebar } from '../components/layout/AppLayout'
+import { Sidebar, defaultNavItems } from '../components/Sidebar'
 import { pb, PocketBaseContext } from '../lib/pocketbase'
 import { QueryClientProvider } from '@tanstack/solid-query'
 import { AuthProvider } from '../auth/AuthContext'
 import { queryClient } from '../lib/queryClient'
 import { NotFoundPage } from './-NotFoundPage'
-import { Suspense } from 'solid-js'
+import { Suspense, createMemo } from 'solid-js'
 import RouteLoading from '../components/RouteLoading'
 import { authStore } from '../auth/auth-store'
 
@@ -32,6 +32,17 @@ export const Route = createRootRoute({
 
   notFoundComponent: () => NotFoundPage,
   component: () => {
+    const { authState } = authStore
+    const userProfile = createMemo(() => {
+      if (!authState.user) return undefined
+      const user = authState.user
+      return {
+        name: user.name || user.email,
+        email: user.email,
+        avatar: user.avatar,
+        role: authState.role === 'admin' ? 'Administrator' : 'User',
+      }
+    })
     return (
       <>
         <PocketBaseContext.Provider value={pb}>
@@ -39,7 +50,9 @@ export const Route = createRootRoute({
             <AuthProvider>
               <div class="bg-slate-900 flex min-h-screen flex-col text-white">
                 <div class="flex flex-grow flex-col lg:flex-row">
-                  <AppSidebar />
+                  {authState.isAuthenticated && authState.user ? (
+                    <Sidebar items={defaultNavItems} userProfile={userProfile()} />
+                  ) : null}
                   <main class="px-4 py-6 pt-16 lg:flex-1 lg:px-8">
                     <Suspense fallback={<RouteLoading />}>
                       <Outlet />

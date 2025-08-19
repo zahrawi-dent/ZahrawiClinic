@@ -133,12 +133,12 @@ const UserProfileDropdown = (props: {
 }) => {
   const [isOpen, setIsOpen] = createSignal(false);
   const { logout } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSignOut = () => {
+  const handleLogout = async () => {
     // TODO: Implement sign out logic
-    logout();
-    console.log('Sign out clicked');
-    setIsOpen(false);
+    await logout();
+    navigate({ to: '/login' });
   };
 
   const handleSettings = () => {
@@ -241,11 +241,11 @@ const UserProfileDropdown = (props: {
               <div class="border-t border-slate-700/50 my-1"></div>
 
               <button
-                onClick={handleSignOut}
+                onClick={handleLogout}
                 class="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-md transition-colors"
               >
                 <LogoutIcon />
-                <span>Sign Out</span>
+                <span>Log Out</span>
               </button>
             </div>
           </div>
