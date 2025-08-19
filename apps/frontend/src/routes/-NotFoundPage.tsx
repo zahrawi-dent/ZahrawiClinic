@@ -1,7 +1,7 @@
 import type { Component } from 'solid-js';
 import { useNavigate } from '@tanstack/solid-router';
 
-const NotFoundPage: Component = () => {
+export const NotFoundPage: Component = () => {
   const navigate = useNavigate();
   return (
     <div class="flex items-center justify-center p-6">
@@ -27,7 +27,4 @@ const NotFoundPage: Component = () => {
     </div>
   );
 };
-
-export default NotFoundPage;
-
 

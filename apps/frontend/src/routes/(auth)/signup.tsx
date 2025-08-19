@@ -1,5 +1,4 @@
-import { createFileRoute } from '@tanstack/solid-router'
-import type { Component } from 'solid-js';
+import { createFileRoute, redirect } from '@tanstack/solid-router'
 import { createSignal, Show } from 'solid-js';
 import { useAuth } from '../../auth/AuthContext';
 import { Link, useRouter } from '@tanstack/solid-router';
