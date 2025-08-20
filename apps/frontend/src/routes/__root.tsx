@@ -41,7 +41,7 @@ export const Route = createRootRoute({
         name: user.name || user.email,
         email: user.email,
         avatar: user.avatar,
-        role: authState.role === 'admin' ? 'Administrator' : 'User',
+        role: authState.role,
       }
     })
     return (

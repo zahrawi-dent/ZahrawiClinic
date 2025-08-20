@@ -24,6 +24,7 @@ export interface AuthState {
   isLoading: boolean;
   error: string | null;
   role: 'receptionist' | 'dentist' | 'manager' | 'admin' | 'user' | null;
+  staffMember: import('../types/pocketbase-types').StaffMembersResponse | null;
 }
 
 export interface AuthContextValue {

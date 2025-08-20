@@ -6,7 +6,8 @@ import { optimisticManager } from './optimistic-manager';
 import type {
   Collections,
   CollectionResponses,
-  CollectionRecords
+  CollectionRecords,
+  StaffMembersResponse
 } from '../types/pocketbase-types';
 import type {
   OptimisticContext,
@@ -297,7 +298,7 @@ export function useRealtimeRecordSubscription(collection: Collections, id: strin
 
     onCleanup(() => {
       if (unsubscribe) {
-        try { unsubscribe(); } catch {}
+        try { unsubscribe(); } catch { }
       }
     });
   });
@@ -894,4 +895,91 @@ export function OptimisticDebugger() {
       )}
     </div>
   );
+}
+
+/**
+ * Hook to fetch staff member record for a specific user
+ * @param userId - The user ID to find the staff member for
+ * @param options - Additional query options
+ */
+export function useStaffMemberByUser(
+  userId: string | undefined,
+  options: {
+    expand?: string;
+    enabled?: boolean;
+  } = {}
+) {
+  const pb = usePocketBase();
+
+  return useQuery(() => ({
+    queryKey: queryKeys.staffMemberByUser(userId),
+    queryFn: async (): Promise<StaffMembersResponse> => {
+      if (!userId) throw new Error('User ID is required');
+
+      return await pb.collection('staff_members').getFirstListItem<StaffMembersResponse>(
+        `user="${userId}"`,
+        {
+          expand: options.expand,
+        }
+      );
+    },
+    enabled: !!userId && userId !== '' && (options.enabled ?? true),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 30,   // 30 minutes (cache time)
+    refetchOnWindowFocus: false,
+    retry: (failureCount, error: any) => {
+      // Don't retry if no staff member record found (404)
+      if (error?.status === 404) return false;
+      return failureCount < 3;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  }));
+}
+
+
+/**
+ * Hook to fetch current user's staff member record
+ * Uses the authenticated user from PocketBase auth store
+ */
+export function useCurrentUserStaffMember(options: {
+  expand?: string;
+  enabled?: boolean;
+} = {}) {
+  const pb = usePocketBase();
+
+  // Get the current user ID from auth store
+  const currentUserId = () => pb.authStore.model?.id;
+
+  return useStaffMemberByUser(currentUserId(), {
+    ...options,
+    enabled: pb.authStore.isValid && (options.enabled ?? true),
+  });
+}
+/**
+ * Extended version that includes organization and clinic data
+ */
+export function useStaffMemberWithDetails(
+  userId: string | undefined,
+  options: {
+    enabled?: boolean;
+  } = {}
+) {
+  return useStaffMemberByUser(userId, {
+    expand: 'user,organization,clinic',
+    enabled: options.enabled,
+  });
+}
+
+/**
+ * Hook for current user's staff member with all related data
+ */
+export function useCurrentUserStaffMemberWithDetails(options: {
+  enabled?: boolean;
+} = {}) {
+  const pb = usePocketBase();
+  const currentUserId = () => pb.authStore.model?.id;
+
+  return useStaffMemberWithDetails(currentUserId(), {
+    enabled: pb.authStore.isValid && (options.enabled ?? true),
+  });
 }

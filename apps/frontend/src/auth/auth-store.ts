@@ -22,21 +22,27 @@ function createAuthStore() {
     isLoading: false,
     error: null,
     role: null,
+    staffMember: null,
   });
 
   // Initialize from auth data-layer snapshot
-  const initializeAuth = () => {
+  const initializeAuth = async () => {
     try {
-      const { user, role } = authLayer.getSnapshot();
+      // Ensure staff is loaded if already authenticated (direct reloads)
+      if (typeof (authLayer as any).ensureStaffLoaded === 'function') {
+        await (authLayer as any).ensureStaffLoaded();
+      }
+      const { user, role, staffMember } = authLayer.getSnapshot();
 
-        setAuthState({
-          user: user,
-          isAuthenticated: !!user,
-          isLoading: false,
-          error: null,
-          role: role,
-        });
-      
+      setAuthState({
+        user: user,
+        isAuthenticated: !!user,
+        isLoading: false,
+        error: null,
+        role: role,
+        staffMember: staffMember ?? null,
+      });
+
     } catch (error) {
       console.error('Failed to initialize auth:', error);
       setAuthState({
@@ -45,12 +51,13 @@ function createAuthStore() {
         isLoading: false,
         error: 'Failed to initialize authentication',
         role: null,
+        staffMember: null,
       });
     }
   };
 
   // Listen to auth data-layer changes
-  authLayer.subscribe(() => {
+  authLayer.subscribe(async () => {
     console.log('Auth state changed via data-layer');
     initializeAuth();
   });

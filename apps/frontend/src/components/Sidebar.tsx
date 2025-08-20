@@ -16,6 +16,8 @@ import { useNavigate, useLocation, Link } from "@tanstack/solid-router";
 import SearchModal from "./SearchModal";
 import { useAuth } from "../auth/AuthContext";
 
+type userRole = "receptionist" | "dentist" | "manager" | "admin" | "user" | null;
+
 // ===== TYPES =====
 export type NavItem = {
   to: string;
@@ -36,7 +38,7 @@ interface SidebarProps {
     name: string;
     email: string;
     avatar?: string;
-    role: string;
+    role: userRole;
   };
   onCollapse?: (collapsed: boolean) => void;
 }
@@ -129,12 +131,13 @@ const Kbd = (props: { children: any; class?: string }) => (
 );
 
 const UserProfileDropdown = (props: {
-  userProfile: { id: string, name: string; email: string; avatar?: string; role: string };
+  userProfile: { id: string, name: string; email: string; avatar?: string; role: userRole };
   collapsed: boolean
 }) => {
   const [isOpen, setIsOpen] = createSignal(false);
   const { logout } = useAuth();
   const navigate = useNavigate();
+  console.log('User profile:', props.userProfile.role);
 
   const handleLogout = async () => {
     // TODO: Implement sign out logic

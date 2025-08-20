@@ -70,6 +70,10 @@ export const queryKeys = {
     relation,
     options
   ] as const,
+
+  // Staff member specific queries
+  staffMemberByUser: (userId: string | undefined) => ['staff_members', 'by_user', userId] as const,
+  currentUserStaffMember: () => ['staff_members', 'current_user'] as const,
 } as const;
 
 // Type helpers for query key inference
