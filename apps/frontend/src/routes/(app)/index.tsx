@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/solid-router'
 import { lazy, Suspense, Switch, Match, For } from 'solid-js'
 import { useAuth } from '../../auth/AuthContext'
-import { usePatients, useRealTimeSync } from '../../lib/useTanStackDB'
+import { usePatients, useCollectionSync } from '../../lib/useTanStackDB'
+import { Collections } from '../../types/pocketbase-types'
 
 const ReceptionistDashboard = lazy(() =>
   import('../../components/dashboard/ReceptionistDashBoard').then(m => ({ default: m.ReceptionistDashboard }))
@@ -30,8 +31,8 @@ function Dashboard() {
   // Use the new TanStack DB hooks
   const patientsQuery = usePatients()
   
-  // Set up real-time sync for all collections
-  useRealTimeSync()
+  // Only sync collections that are actually being used
+  useCollectionSync(Collections.Patients)
 
   console.log(patientsQuery.data)
   return (

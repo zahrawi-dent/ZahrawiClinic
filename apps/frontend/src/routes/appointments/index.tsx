@@ -3,9 +3,9 @@ import { Show, createSignal, createMemo } from 'solid-js';
 import { createForm } from '@tanstack/solid-form';
 import { Collections } from '../../types/pocketbase-types';
 import type { AppointmentsResponse } from '../../types/pocketbase-types';
-import { useListQuery, useCreateMutation, useDeleteMutation } from '../../data';
-import { useRealtimeSubscription } from '../../optimistic/optimistic-hooks';
+import { useAppointments, useCollectionSync, useCollections } from '../../lib/useTanStackDB';
 import AppointmentCalendar from '../../components/AppointmentCalendar';
+import { pb } from '../../lib/pocketbase';
 
 export const Route = createFileRoute('/appointments/')({
   component: AppointmentsPage,
@@ -14,10 +14,19 @@ export const Route = createFileRoute('/appointments/')({
 
 
 function AppointmentsPage() {
-  const collection = Collections.Appointments;
-  const apptsQuery = useListQuery(collection, { perPage: 50, sort: 'start_time' });
-  const createAppt = useCreateMutation(collection);
-  // const deleteAppt = useDeleteMutation(collection);
+  // Set up real-time sync for appointments collection
+  useCollectionSync(Collections.Appointments)
+  
+  // Use TanStack DB hooks
+  const apptsQuery = useAppointments()
+  const collections = useCollections()
+  
+  // Debug logging
+  console.log('Appointments query:', apptsQuery)
+  console.log('Appointments data:', apptsQuery.data)
+  console.log('Appointments loading:', apptsQuery.isLoading())
+  console.log('Appointments error:', apptsQuery.isError())
+  
   const [formOpen, setFormOpen] = createSignal(false);
   const form = createForm(() => ({
     defaultValues: {
@@ -27,28 +36,28 @@ function AppointmentsPage() {
       notes: '',
     },
     onSubmit: async ({ value }) => {
-      await createAppt.mutateAsync({
-        data: {
+      try {
+        await collections.appointments.insert({
           start_time: value.start_time ? new Date(value.start_time).toISOString() : new Date().toISOString(),
           end_time: value.end_time ? new Date(value.end_time).toISOString() : undefined,
-          status: 'scheduled' as any,
+          status: 'scheduled',
           notes: value.notes || '',
           reason: value.reason || '',
           patient: [],
           doctor: [],
           clinic: [],
-        },
-      } as any);
-      setFormOpen(false);
+        } as any)
+        setFormOpen(false)
+      } catch (error) {
+        console.error('Error creating appointment:', error)
+      }
     },
   }));
 
-  // Live updates
-  useRealtimeSubscription(Collections.Appointments);
-
   // Transform PocketBase appointments to calendar format
   const calendarAppointments = createMemo(() => {
-    const items = (apptsQuery.data?.items ?? []) as AppointmentsResponse[];
+    const items = (apptsQuery.data ?? []) as AppointmentsResponse[];
+    console.log('Calendar appointments items:', items)
     return items.map((apt) => ({
       id: apt.id,
       patientName: apt.patient?.[0] || 'Unknown Patient',
@@ -71,37 +80,65 @@ function AppointmentsPage() {
     e.preventDefault();
     const form = e.currentTarget as HTMLFormElement;
     const fd = new FormData(form);
-    await createAppt.mutateAsync({
-      data: {
+    try {
+      await collections.appointments.insert({
         start_time: new Date(String(fd.get('start_time'))).toISOString(),
         end_time: new Date(String(fd.get('end_time'))).toISOString(),
-        status: 'scheduled' as any,
+        status: 'scheduled',
         notes: String(fd.get('notes') || ''),
         reason: String(fd.get('reason') || ''),
         patient: [],
         doctor: [],
         clinic: [],
-      },
-    } as any);
-    form.reset();
-    setFormOpen(false);
+      } as any);
+      form.reset();
+      setFormOpen(false);
+    } catch (error) {
+      console.error('Error creating appointment:', error)
+    }
   };
 
   return (
     <div class="min-h-screen p-6">
-      <Show when={apptsQuery.isLoading}>
+      {/* Debug section */}
+      <div class="mb-4 p-4 bg-gray-100 rounded">
+        <h3 class="font-bold mb-2">Debug Info:</h3>
+        <p>Loading: {apptsQuery.isLoading() ? 'Yes' : 'No'}</p>
+        <p>Error: {apptsQuery.isError() ? 'Yes' : 'No'}</p>
+        <p>Data length: {apptsQuery.data?.length ?? 0}</p>
+        <button 
+          onClick={() => {
+            console.log('Testing PocketBase connection...')
+            console.log('Auth state:', pb.authStore.isValid)
+            console.log('Auth model:', pb.authStore.model)
+            pb.collection('appointments').getFullList().then((data: any) => {
+              console.log('PocketBase appointments:', data)
+            }).catch((error: any) => {
+              console.error('PocketBase error:', error)
+            })
+          }}
+          class="px-3 py-1 bg-blue-500 text-white rounded text-sm"
+        >
+          Test PocketBase Connection
+        </button>
+      </div>
+      <Show when={apptsQuery.isLoading()}>
         <div class="flex items-center justify-center h-64">
           <div class="text-lg text-gray-200">Loading appointments…</div>
         </div>
       </Show>
 
-      <Show when={apptsQuery.isError}>
+      <Show when={apptsQuery.isError()}>
         <div class="flex items-center justify-center h-64">
           <div class="text-lg text-red-600">Failed to load appointments</div>
         </div>
       </Show>
 
-      <Show when={apptsQuery.data}>
+      <Show when={apptsQuery.data} fallback={
+        <div class="flex items-center justify-center h-64">
+          <div class="text-lg text-gray-400">No appointments found</div>
+        </div>
+      }>
         <AppointmentCalendar appointments={calendarAppointments} />
       </Show>
 
@@ -172,8 +209,8 @@ function AppointmentsPage() {
               </div>
               <div class="md:col-span-2 flex justify-end gap-2 mt-2">
                 <button type="button" onClick={() => setFormOpen(false)} class="rounded border px-3 py-2">Cancel</button>
-                <button type="submit" class="rounded bg-indigo-600 px-3 py-2 text-white" disabled={createAppt.isPending}>
-                  {createAppt.isPending ? 'Creating…' : 'Create'}
+                <button type="submit" class="rounded bg-indigo-600 px-3 py-2 text-white">
+                  Create
                 </button>
               </div>
             </form>

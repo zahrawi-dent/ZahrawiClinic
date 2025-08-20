@@ -1,13 +1,56 @@
 import { useNavigate } from "@tanstack/solid-router";
-import { For, type Component } from "solid-js";
+import { For, type Component, createMemo } from "solid-js";
 import { ArrowRightIcon, CalendarIcon, ClockIcon, PlusIcon, UsersIcon } from "../icons";
 import { StatCard } from "./StatCard";
-import { mockAppointments, mockStats } from "./mockData";
 import { QuickActionCard } from "./QuickActionCard";
 import { AppointmentCard } from "./AppointmentCard";
+import { usePatients, useAppointments, useCollectionSync } from "../../lib/useTanStackDB";
+import { Collections } from "../../types/pocketbase-types";
 
 export const ReceptionistDashboard = () => {
   const navigate = useNavigate();
+
+  // Set up real-time sync for collections we need
+  useCollectionSync(Collections.Patients)
+  useCollectionSync(Collections.Appointments)
+
+  // Use real data instead of mock data
+  const patientsQuery = usePatients()
+  const appointmentsQuery = useAppointments()
+
+  // Calculate real stats
+  const stats = createMemo(() => {
+    const patients = patientsQuery.data || []
+    const appointments = appointmentsQuery.data || []
+    
+    const today = new Date().toISOString().split('T')[0]
+    const todayAppointments = appointments.filter(a => 
+      a.start_time?.startsWith(today)
+    )
+    
+    const pendingAppointments = appointments.filter(a => 
+      a.status === 'scheduled' || a.status === 'pending'
+    )
+
+    return {
+      todayAppointments: todayAppointments.length,
+      pendingAppointments: pendingAppointments.length,
+      totalPatients: patients.length,
+      newPatients: patients.filter(p => {
+        const createdDate = new Date(p.created).toISOString().split('T')[0]
+        return createdDate === today
+      }).length
+    }
+  })
+
+  // Get today's appointments for display
+  const todayAppointments = createMemo(() => {
+    const appointments = appointmentsQuery.data || []
+    const today = new Date().toISOString().split('T')[0]
+    return appointments
+      .filter(a => a.start_time?.startsWith(today))
+      .slice(0, 6) // Show only first 6 appointments
+  })
 
   const quickActions: Array<{ title: string; description: string; icon: Component; onClick: () => void }> = [
     {
@@ -42,30 +85,30 @@ export const ReceptionistDashboard = () => {
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Today's Appointments"
-          value={mockStats.todayAppointments}
+          value={stats().todayAppointments}
           icon={CalendarIcon}
-          trend="+12% from yesterday"
+          trend={`${stats().todayAppointments} scheduled`}
           trendType="up"
         />
         <StatCard
           title="Pending Appointments"
-          value={mockStats.pendingAppointments}
+          value={stats().pendingAppointments}
           icon={ClockIcon}
-          trend="3 need confirmation"
+          trend={`${stats().pendingAppointments} need confirmation`}
           trendType="down"
         />
         <StatCard
           title="Total Patients"
-          value={mockStats.totalPatients}
+          value={stats().totalPatients}
           icon={UsersIcon}
-          trend="+5 this week"
+          trend={`${stats().newPatients} new today`}
           trendType="up"
         />
         <StatCard
           title="New Patients"
-          value={mockStats.newPatients}
+          value={stats().newPatients}
           icon={UsersIcon}
-          trend="+2 today"
+          trend={`${stats().newPatients} registered today`}
           trendType="up"
         />
       </div>
@@ -100,8 +143,8 @@ export const ReceptionistDashboard = () => {
           </button>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <For each={mockAppointments}>
-            {(appointment) => (
+          <For each={todayAppointments()} fallback={<p class="text-gray-400">No appointments scheduled for today.</p>}>
+            {(appointment: any) => (
               <AppointmentCard appointment={appointment} />
             )}
           </For>

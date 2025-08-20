@@ -28,6 +28,8 @@ function createAuthStore() {
   // Initialize from auth data-layer snapshot
   const initializeAuth = async () => {
     try {
+      setAuthState('isLoading', true);
+      
       // Ensure staff is loaded if already authenticated (direct reloads)
       if (typeof (authLayer as any).ensureStaffLoaded === 'function') {
         await (authLayer as any).ensureStaffLoaded();
@@ -42,6 +44,8 @@ function createAuthStore() {
         role: role,
         staffMember: staffMember ?? null,
       });
+
+      console.log('Auth initialized:', { user: !!user, role, isAuthenticated: !!user });
 
     } catch (error) {
       console.error('Failed to initialize auth:', error);

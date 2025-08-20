@@ -117,8 +117,101 @@ export const usersCollection = createPocketBaseCollection(
   { sort: 'name' }
 )
 
-// Real-time sync setup for all collections
+// Collection-specific real-time sync
+export function setupCollectionSync(collectionName: Collections) {
+  const collectionMap: Record<string, any> = {
+    [Collections.Appointments]: appointmentsCollection,
+    [Collections.Clinics]: clinicsCollection,
+    [Collections.DentalCharts]: dentalChartsCollection,
+    [Collections.Organizations]: organizationsCollection,
+    [Collections.PatientTransfers]: patientTransfersCollection,
+    [Collections.Patients]: patientsCollection,
+    [Collections.StaffMembers]: staffMembersCollection,
+    [Collections.TreatmentRecords]: treatmentRecordsCollection,
+    [Collections.TreatmentsCatalog]: treatmentsCatalogCollection,
+    [Collections.Users]: usersCollection,
+  }
+
+  const collection = collectionMap[collectionName]
+  if (!collection) {
+    console.warn(`Collection ${collectionName} not found`)
+    return () => {}
+  }
+
+  let unsubscribe: (() => void) | null = null
+
+  pb.collection(collectionName).subscribe('*', (event) => {
+    switch (event.action) {
+      case 'create':
+        collection.utils.writeInsert(event.record)
+        break
+      case 'update':
+        collection.utils.writeUpdate(event.record)
+        break
+      case 'delete':
+        collection.utils.writeDelete(event.record.id)
+        break
+    }
+  }).then((unsub) => {
+    unsubscribe = unsub
+  })
+
+  // Return cleanup function
+  return () => {
+    if (unsubscribe) {
+      unsubscribe()
+    }
+  }
+}
+
+// Record-specific real-time sync
+export function setupRecordSync(collectionName: Collections, recordId: string) {
+  const collectionMap: Record<string, any> = {
+    [Collections.Appointments]: appointmentsCollection,
+    [Collections.Clinics]: clinicsCollection,
+    [Collections.DentalCharts]: dentalChartsCollection,
+    [Collections.Organizations]: organizationsCollection,
+    [Collections.PatientTransfers]: patientTransfersCollection,
+    [Collections.Patients]: patientsCollection,
+    [Collections.StaffMembers]: staffMembersCollection,
+    [Collections.TreatmentRecords]: treatmentRecordsCollection,
+    [Collections.TreatmentsCatalog]: treatmentsCatalogCollection,
+    [Collections.Users]: usersCollection,
+  }
+
+  const collection = collectionMap[collectionName]
+  if (!collection) {
+    console.warn(`Collection ${collectionName} not found`)
+    return () => {}
+  }
+
+  let unsubscribe: (() => void) | null = null
+
+  pb.collection(collectionName).subscribe(recordId, (event) => {
+    switch (event.action) {
+      case 'update':
+        collection.utils.writeUpdate(event.record)
+        break
+      case 'delete':
+        collection.utils.writeDelete(event.record.id)
+        break
+    }
+  }).then((unsub) => {
+    unsubscribe = unsub
+  })
+
+  // Return cleanup function
+  return () => {
+    if (unsubscribe) {
+      unsubscribe()
+    }
+  }
+}
+
+// Legacy function for backward compatibility (use sparingly)
 export function setupRealTimeSync() {
+  console.warn('setupRealTimeSync() is deprecated. Use setupCollectionSync() for specific collections instead.')
+  
   const collections = [
     { name: Collections.Appointments, collection: appointmentsCollection },
     { name: Collections.Clinics, collection: clinicsCollection },

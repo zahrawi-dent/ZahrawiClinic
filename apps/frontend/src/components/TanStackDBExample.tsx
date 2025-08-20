@@ -10,28 +10,25 @@ import {
   useDentalCharts,
   usePatientTransfers,
   useUsers,
-  useRealTimeSync,
+  useCollectionSync,
+  useRecordSync,
   useCollections
 } from '../lib/useTanStackDB'
+import { Collections } from '../types/pocketbase-types'
 
 export function TanStackDBExample() {
-  // Set up real-time sync for all collections
-  useRealTimeSync()
+  // Only sync collections that are actually being used
+  useCollectionSync(Collections.Patients)
+  useCollectionSync(Collections.Appointments)
+  useCollectionSync(Collections.Clinics)
   
   // Get all collections
   const collections = useCollections()
   
-  // Use all the hooks
+  // Use only the collections we need
   const patientsQuery = usePatients()
   const appointmentsQuery = useAppointments()
   const clinicsQuery = useClinics()
-  const organizationsQuery = useOrganizations()
-  const staffQuery = useStaffMembers()
-  const treatmentsQuery = useTreatmentsCatalog()
-  const treatmentRecordsQuery = useTreatmentRecords()
-  const dentalChartsQuery = useDentalCharts()
-  const patientTransfersQuery = usePatientTransfers()
-  const usersQuery = useUsers()
   
   // Search functionality
   const [searchTerm, setSearchTerm] = createSignal('')
@@ -47,7 +44,7 @@ export function TanStackDBExample() {
         dob: '1990-01-01',
         sex: 'male',
         primary_clinic: ['clinic-id-here']
-      } as any)
+      } as any) // Added as any to bypass type error
       console.log('Patient added successfully')
     } catch (error) {
       console.error('Error adding patient:', error)
@@ -76,7 +73,17 @@ export function TanStackDBExample() {
 
   return (
     <div class="p-6 space-y-8">
-      <h1 class="text-3xl font-bold text-gray-900">TanStack DB Example</h1>
+      <h1 class="text-3xl font-bold text-gray-900">TanStack DB Example (Performant)</h1>
+      
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h2 class="text-lg font-semibold text-blue-900 mb-2">Performance Notes</h2>
+        <ul class="text-sm text-blue-800 space-y-1">
+          <li>• Only subscribing to collections that are actually used (Patients, Appointments, Clinics)</li>
+          <li>• Not loading all data at once - only what's needed</li>
+          <li>• Real-time sync is targeted and efficient</li>
+          <li>• Memory usage is optimized</li>
+        </ul>
+      </div>
       
       {/* Search */}
       <div class="space-y-4">
@@ -102,7 +109,7 @@ export function TanStackDBExample() {
           </button>
         </div>
         
-        <Show when={!patientsQuery.isLoading} fallback={<p>Loading patients...</p>}>
+        <Show when={!patientsQuery.isLoading()} fallback={<p>Loading patients...</p>}>
           <div class="grid gap-4">
             <For each={patientsQuery.data} fallback={<p>No patients found.</p>}>
               {(patient: any) => (
@@ -138,7 +145,7 @@ export function TanStackDBExample() {
       {/* Appointments */}
       <div class="space-y-4">
         <h2 class="text-xl font-semibold">Appointments</h2>
-        <Show when={!appointmentsQuery.isLoading} fallback={<p>Loading appointments...</p>}>
+        <Show when={!appointmentsQuery.isLoading()} fallback={<p>Loading appointments...</p>}>
           <div class="grid gap-4">
             <For each={appointmentsQuery.data} fallback={<p>No appointments found.</p>}>
               {(appointment: any) => (
@@ -157,7 +164,7 @@ export function TanStackDBExample() {
       {/* Clinics */}
       <div class="space-y-4">
         <h2 class="text-xl font-semibold">Clinics</h2>
-        <Show when={!clinicsQuery.isLoading} fallback={<p>Loading clinics...</p>}>
+        <Show when={!clinicsQuery.isLoading()} fallback={<p>Loading clinics...</p>}>
           <div class="grid gap-4">
             <For each={clinicsQuery.data} fallback={<p>No clinics found.</p>}>
               {(clinic: any) => (
@@ -173,149 +180,14 @@ export function TanStackDBExample() {
         </Show>
       </div>
 
-      {/* Organizations */}
-      <div class="space-y-4">
-        <h2 class="text-xl font-semibold">Organizations</h2>
-        <Show when={!organizationsQuery.isLoading} fallback={<p>Loading organizations...</p>}>
-          <div class="grid gap-4">
-            <For each={organizationsQuery.data} fallback={<p>No organizations found.</p>}>
-              {(org: any) => (
-                <div class="p-4 border border-gray-200 rounded">
-                  <h3 class="font-medium">{org.organization_name}</h3>
-                  <p class="text-sm text-gray-600">{org.address}</p>
-                </div>
-              )}
-            </For>
-          </div>
-        </Show>
-      </div>
-
-      {/* Staff Members */}
-      <div class="space-y-4">
-        <h2 class="text-xl font-semibold">Staff Members</h2>
-        <Show when={!staffQuery.isLoading} fallback={<p>Loading staff...</p>}>
-          <div class="grid gap-4">
-            <For each={staffQuery.data} fallback={<p>No staff found.</p>}>
-              {(staff: any) => (
-                <div class="p-4 border border-gray-200 rounded">
-                  <h3 class="font-medium">Staff #{staff.id}</h3>
-                  <p class="text-sm text-gray-600">Role: {staff.role}</p>
-                  <p class="text-sm text-gray-600">Active: {staff.is_active ? 'Yes' : 'No'}</p>
-                </div>
-              )}
-            </For>
-          </div>
-        </Show>
-      </div>
-
-      {/* Treatments Catalog */}
-      <div class="space-y-4">
-        <h2 class="text-xl font-semibold">Treatments Catalog</h2>
-        <Show when={!treatmentsQuery.isLoading} fallback={<p>Loading treatments...</p>}>
-          <div class="grid gap-4">
-            <For each={treatmentsQuery.data} fallback={<p>No treatments found.</p>}>
-              {(treatment: any) => (
-                <div class="p-4 border border-gray-200 rounded">
-                  <h3 class="font-medium">{treatment.name}</h3>
-                  <p class="text-sm text-gray-600">{treatment.description}</p>
-                  <p class="text-sm text-gray-600">Price: ${treatment.default_price}</p>
-                </div>
-              )}
-            </For>
-          </div>
-        </Show>
-      </div>
-
-      {/* Treatment Records */}
-      <div class="space-y-4">
-        <h2 class="text-xl font-semibold">Treatment Records</h2>
-        <Show when={!treatmentRecordsQuery.isLoading} fallback={<p>Loading treatment records...</p>}>
-          <div class="grid gap-4">
-            <For each={treatmentRecordsQuery.data} fallback={<p>No treatment records found.</p>}>
-              {(record: any) => (
-                <div class="p-4 border border-gray-200 rounded">
-                  <h3 class="font-medium">Treatment Record #{record.id}</h3>
-                  <p class="text-sm text-gray-600">Price: ${record.price_charged}</p>
-                  <p class="text-sm text-gray-600">Notes: {record.clinical_notes}</p>
-                </div>
-              )}
-            </For>
-          </div>
-        </Show>
-      </div>
-
-      {/* Dental Charts */}
-      <div class="space-y-4">
-        <h2 class="text-xl font-semibold">Dental Charts</h2>
-        <Show when={!dentalChartsQuery.isLoading} fallback={<p>Loading dental charts...</p>}>
-          <div class="grid gap-4">
-            <For each={dentalChartsQuery.data} fallback={<p>No dental charts found.</p>}>
-              {(chart: any) => (
-                <div class="p-4 border border-gray-200 rounded">
-                  <h3 class="font-medium">Dental Chart #{chart.id}</h3>
-                  <p class="text-sm text-gray-600">Type: {chart.chart_type}</p>
-                  <p class="text-sm text-gray-600">Dentition: {chart.dentition}</p>
-                  <p class="text-sm text-gray-600">Notation: {chart.notation_system}</p>
-                </div>
-              )}
-            </For>
-          </div>
-        </Show>
-      </div>
-
-      {/* Patient Transfers */}
-      <div class="space-y-4">
-        <h2 class="text-xl font-semibold">Patient Transfers</h2>
-        <Show when={!patientTransfersQuery.isLoading} fallback={<p>Loading patient transfers...</p>}>
-          <div class="grid gap-4">
-            <For each={patientTransfersQuery.data} fallback={<p>No patient transfers found.</p>}>
-              {(transfer: any) => (
-                <div class="p-4 border border-gray-200 rounded">
-                  <h3 class="font-medium">Transfer #{transfer.id}</h3>
-                  <p class="text-sm text-gray-600">Date: {transfer.transfer_date}</p>
-                  <p class="text-sm text-gray-600">Reason: {transfer.reason}</p>
-                </div>
-              )}
-            </For>
-          </div>
-        </Show>
-      </div>
-
-      {/* Users */}
-      <div class="space-y-4">
-        <h2 class="text-xl font-semibold">Users</h2>
-        <Show when={!usersQuery.isLoading} fallback={<p>Loading users...</p>}>
-          <div class="grid gap-4">
-            <For each={usersQuery.data} fallback={<p>No users found.</p>}>
-              {(user: any) => (
-                <div class="p-4 border border-gray-200 rounded">
-                  <h3 class="font-medium">{user.name || user.email}</h3>
-                  <p class="text-sm text-gray-600">{user.email}</p>
-                  <p class="text-sm text-gray-600">Verified: {user.verified ? 'Yes' : 'No'}</p>
-                </div>
-              )}
-            </For>
-          </div>
-        </Show>
-      </div>
-
       {/* Status Information */}
       <div class="space-y-4">
         <h2 class="text-xl font-semibold">Query Status</h2>
-        <div class="grid grid-cols-2 gap-4 text-sm">
+        <div class="grid grid-cols-3 gap-4 text-sm">
           <div>
             <p><strong>Patients:</strong> {patientsQuery.isLoading() ? 'Loading' : patientsQuery.isReady() ? 'Ready' : 'Error'}</p>
             <p><strong>Appointments:</strong> {appointmentsQuery.isLoading() ? 'Loading' : appointmentsQuery.isReady() ? 'Ready' : 'Error'}</p>
             <p><strong>Clinics:</strong> {clinicsQuery.isLoading() ? 'Loading' : clinicsQuery.isReady() ? 'Ready' : 'Error'}</p>
-            <p><strong>Organizations:</strong> {organizationsQuery.isLoading() ? 'Loading' : organizationsQuery.isReady() ? 'Ready' : 'Error'}</p>
-            <p><strong>Staff:</strong> {staffQuery.isLoading() ? 'Loading' : staffQuery.isReady() ? 'Ready' : 'Error'}</p>
-          </div>
-          <div>
-            <p><strong>Treatments:</strong> {treatmentsQuery.isLoading() ? 'Loading' : treatmentsQuery.isReady() ? 'Ready' : 'Error'}</p>
-            <p><strong>Treatment Records:</strong> {treatmentRecordsQuery.isLoading() ? 'Loading' : treatmentRecordsQuery.isReady() ? 'Ready' : 'Error'}</p>
-            <p><strong>Dental Charts:</strong> {dentalChartsQuery.isLoading() ? 'Loading' : dentalChartsQuery.isReady() ? 'Ready' : 'Error'}</p>
-            <p><strong>Patient Transfers:</strong> {patientTransfersQuery.isLoading() ? 'Loading' : patientTransfersQuery.isReady() ? 'Ready' : 'Error'}</p>
-            <p><strong>Users:</strong> {usersQuery.isLoading() ? 'Loading' : usersQuery.isReady() ? 'Ready' : 'Error'}</p>
           </div>
         </div>
       </div>

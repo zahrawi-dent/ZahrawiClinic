@@ -1,12 +1,34 @@
 import { useLiveQuery } from "@tanstack/solid-db"
-import { createEffect, onCleanup } from "solid-js"
-import { setupRealTimeSync, collections } from './tanstack-db'
+import { createEffect, onCleanup, createSignal } from "solid-js"
+import { setupCollectionSync, setupRecordSync, setupRealTimeSync, collections } from './tanstack-db'
+import { Collections } from '../types/pocketbase-types'
 
 // Type-safe collection access
 export const useCollections = () => collections
 
-// Custom hook for real-time sync setup
+// Custom hook for collection-specific real-time sync
+export function useCollectionSync(collectionName: Collections) {
+  createEffect(() => {
+    const cleanup = setupCollectionSync(collectionName)
+    onCleanup(cleanup)
+  })
+}
+
+// Custom hook for record-specific real-time sync
+export function useRecordSync(collectionName: Collections, recordId: () => string) {
+  createEffect(() => {
+    const id = recordId()
+    if (!id) return
+    
+    const cleanup = setupRecordSync(collectionName, id)
+    onCleanup(cleanup)
+  })
+}
+
+// Legacy hook for backward compatibility (use sparingly)
 export function useRealTimeSync() {
+  console.warn('useRealTimeSync() is deprecated. Use useCollectionSync() for specific collections instead.')
+  
   createEffect(() => {
     const cleanup = setupRealTimeSync()
     onCleanup(cleanup)

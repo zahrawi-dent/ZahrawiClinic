@@ -2,8 +2,7 @@ import { createFileRoute } from '@tanstack/solid-router'
 import { For, Show, createSignal, createMemo } from 'solid-js';
 import { useNavigate } from '@tanstack/solid-router';
 import { Collections } from '../../types/pocketbase-types';
-import { useListQuery, useDeleteMutation } from '../../data';
-import { useRealtimeSubscription } from '../../optimistic/optimistic-hooks';
+import { usePatients, useCollectionSync, useCollections } from '../../lib/useTanStackDB';
 
 
 
@@ -28,17 +27,18 @@ const PlusIcon = () => (
 
 function PatientsListPage() {
   const navigate = useNavigate();
-  const collection = Collections.Patients;
-  const patientsQuery = useListQuery(collection, { perPage: 50, sort: 'last_name,first_name' });
-  const deletePatient = useDeleteMutation(collection);
+  
+  // Set up real-time sync for patients collection
+  useCollectionSync(Collections.Patients)
+  
+  // Use TanStack DB hooks
+  const patientsQuery = usePatients()
+  const collections = useCollections()
 
   const [search, setSearch] = createSignal('');
   const [sexFilter, setSexFilter] = createSignal<'all' | 'male' | 'female'>('all');
   const [sortBy, setSortBy] = createSignal<'name_asc' | 'name_desc' | 'dob_desc' | 'dob_asc'>('name_asc');
   const [view, setView] = createSignal<'table' | 'grid'>('table');
-
-  // Live updates
-  useRealtimeSubscription(Collections.Patients);
 
   const getInitials = (first: string, last: string) => {
     const a = (first || '').trim()[0] || '';
@@ -57,7 +57,7 @@ function PatientsListPage() {
   };
 
   const filteredPatients = createMemo(() => {
-    let items = patientsQuery.data?.items ?? [];
+    let items = patientsQuery.data ?? [];
 
     // Search
     const term = search().trim().toLowerCase();
@@ -96,8 +96,18 @@ function PatientsListPage() {
     return items;
   });
 
-  const maleCount = createMemo(() => (patientsQuery.data?.items || []).filter(p => p.sex === 'male').length);
-  const femaleCount = createMemo(() => (patientsQuery.data?.items || []).filter(p => p.sex === 'female').length);
+  const maleCount = createMemo(() => (patientsQuery.data || []).filter(p => p.sex === 'male').length);
+  const femaleCount = createMemo(() => (patientsQuery.data || []).filter(p => p.sex === 'female').length);
+
+  // Delete patient function using TanStack DB
+  const deletePatient = async (patientId: string) => {
+    try {
+      await collections.patients.delete(patientId)
+      console.log('Patient deleted successfully')
+    } catch (error) {
+      console.error('Error deleting patient:', error)
+    }
+  }
 
   return (
     <div class="min-h-screen p-6 space-y-6">
@@ -135,7 +145,7 @@ function PatientsListPage() {
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="rounded-lg shadow-sm border border-gray-200 p-4">
             <div class="text-sm text-gray-200">Total patients</div>
-            <div class="mt-1 text-2xl font-bold text-gray-100">{patientsQuery.data?.totalItems ?? 0}</div>
+            <div class="mt-1 text-2xl font-bold text-gray-100">{patientsQuery.data?.length ?? 0}</div>
           </div>
           <div class="rounded-lg shadow-sm border border-gray-200 p-4">
             <div class="text-sm text-gray-200">Male</div>
@@ -189,13 +199,13 @@ function PatientsListPage() {
       </div>
 
       {/* Content */}
-      <Show when={patientsQuery.isLoading}>
+      <Show when={patientsQuery.isLoading()}>
         <div class="flex items-center justify-center h-64">
           <div class="text-lg text-gray-200">Loading patients…</div>
         </div>
       </Show>
 
-      <Show when={patientsQuery.isError}>
+      <Show when={patientsQuery.isError()}>
         <div class="flex items-center justify-center h-64">
           <div class="text-lg text-red-600">Failed to load patients</div>
         </div>
@@ -206,7 +216,7 @@ function PatientsListPage() {
           <div class="rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
               <div class="text-sm text-gray-200">
-                Showing {filteredPatients().length} of {patientsQuery.data!.totalItems} patients
+                Showing {filteredPatients().length} of {patientsQuery.data?.length ?? 0} patients
               </div>
             </div>
 
@@ -225,7 +235,7 @@ function PatientsListPage() {
                 </thead>
                 <tbody>
                   <For each={filteredPatients()} fallback={<tr><td class="px-4 py-3">No patients</td></tr>}>
-                    {(p) => (
+                    {(p: any) => (
                       <tr class="border-t hover:bg-slate-800">
                         <td class="px-4 py-3">
                           <div class="flex items-center gap-3">
@@ -265,7 +275,7 @@ function PatientsListPage() {
                           </button>
                           <button
                             class="rounded border px-2 py-1 text-red-600 hover:bg-red-50"
-                            onClick={() => deletePatient.mutate({ id: p.id })}
+                            onClick={() => deletePatient(p.id)}
                           >
                             Delete
                           </button>
@@ -282,7 +292,7 @@ function PatientsListPage() {
         <Show when={view() === 'grid'}>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <For each={filteredPatients()} fallback={<div class="text-gray-500">No patients</div>}>
-              {(p) => (
+              {(p: any) => (
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                   <div class="flex items-start gap-3">
                     <div class={`h-12 w-12 rounded-full flex items-center justify-center text-sm font-semibold ${p.sex === 'male' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700'}`}>
@@ -308,7 +318,7 @@ function PatientsListPage() {
                         >Schedule</button>
                         <button
                           class="px-3 py-1.5 rounded-md border text-sm text-red-600 hover:bg-red-50"
-                          onClick={() => deletePatient.mutate({ id: p.id })}
+                          onClick={() => deletePatient(p.id)}
                         >Delete</button>
                       </div>
                     </div>
