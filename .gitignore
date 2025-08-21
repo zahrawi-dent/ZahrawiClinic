@@ -11,4 +11,4 @@ apps/frontend/.solid
 
 # Turbo
 .turbo
-todo.md
+*.md
