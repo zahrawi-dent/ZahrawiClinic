@@ -1,0 +1,1 @@
+const e={completedTreatments:156,revenue:45600},a=[{id:"1",name:"Sarah Johnson",email:"sarah.johnson@email.com",phone:"+1 (555) 123-4567",lastVisit:"2024-01-10",nextAppointment:"2024-01-15",status:"active"},{id:"2",name:"Michael Chen",email:"michael.chen@email.com",phone:"+1 (555) 234-5678",lastVisit:"2024-01-12",status:"active"}];export{a,e as m};
